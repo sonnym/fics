@@ -1,0 +1,28 @@
+{
+  "name": "fics",
+  "version": "0.0.1",
+  "description": "A promise-based interface for the Free Internet Chess Server",
+  "main": "index.js",
+
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sonnym/fics.git"
+  },
+
+  "keywords": [
+    "chess",
+    "fics"
+  ],
+
+
+  "dependencies": {
+    "q": "*",
+    "underscore": "*"
+  },
+
+  "author": "Sonny Michaud <michaud.sonny@gmail.com> (https://github.com/sonnym)",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/sonnym/fics/issues"
+  }
+}
