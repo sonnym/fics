@@ -9,6 +9,10 @@
     "url": "git://github.com/sonnym/fics.git"
   },
 
+  "scripts": {
+    "test": "./node_modules/.bin/nodeunit test/index.js"
+  },
+
   "keywords": [
     "chess",
     "fics"
