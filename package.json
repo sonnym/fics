@@ -19,6 +19,11 @@
     "underscore": "*"
   },
 
+  "devDependencies": {
+    "nodeunit": "*",
+    "sinon": "*"
+  },
+
   "author": "Sonny Michaud <michaud.sonny@gmail.com> (https://github.com/sonnym)",
   "license": "BSD-2-Clause",
   "bugs": {
