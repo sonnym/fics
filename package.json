@@ -24,6 +24,8 @@
   },
 
   "devDependencies": {
+    "groc": "git://github.com/nevir/groc.git#93e9d7773c90197596a9dd0189a3289de3a03169",
+
     "nodeunit": "*",
     "sinon": "*"
   },
