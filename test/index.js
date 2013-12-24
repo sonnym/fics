@@ -35,6 +35,8 @@ exports.test_user_login = function(test) {
 
   var loginPromise = fics.login({ login: username, password: password });
   loginPromise.then(function(data) {
+    test.equal(data.username, username);
+
     mockSocket.close();
     test.done();
   });
