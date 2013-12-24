@@ -1,0 +1,40 @@
+**** Starting FICS session as foo ****
+------------------------------------------------------------------------------
+                         *** Message Of The Day ***
+
+
+Today's Scheduled Events:
+    0430: The Daily 5 0
+    1100: U1800 20 0
+    1300: Fischer Random tournament
+    1900: The Nightly 5 0
+
+
+
+To join a scheduled tournament, join channel 49 (+channel 49)
+And be there for the scheduled start.
+
+For a complete tournament schedule, type "td help schedule"
+Regular tournaments are run all day, "td set tourneyinfo on" to see them.
+
+All times are server times.
+To check the current server time, use "date".
+==============================================================================
+FICS web page: http://www.freechess.org   - add a link to FICS from your page
+==============================================================================
+
+Index of new news items:
+1525 (Mon, Nov 11) Some services are not running properly
+1526 (Fri, Nov 22) GM Magnus Carlsen is the new World Chess Champion!
+1529 (Sun, Dec 22) Most services restored
+("news <n>" will display item number 'n')
+
+
+You have 2 messages (0 unread).
+Use "messages u" to view unread messages and "clearmessages *" to clear all.
+fics% 
+:
+:The following tournaments are currently in progress:
+: 
+:4   Groningen Festival 2013 Open A - Round 4                Round Started
+fics% 

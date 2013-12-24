@@ -22,14 +22,20 @@ exports.test_client_can_be_created = function(test) {
 }
 
 exports.test_user_login = function(test) {
-  var mockSocket = new MockSocket();
-  mockSocket.registerFixture("login_screen");
+  var username = "foo";
+  var password = "bar";
+
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixtures(["login_screen", "login_intermezzo", "login_success"]);
+  mockSocket.registerMessages([username, password]);
+
+  var fics = new FICSClient();
 
   mockSocket.run();
 
-  var fics = new FICSClient();
-  var loginPromise = fics.login({ login: "foo", password: "bar" });
-
-  mockSocket.close();
-  test.done();
+  var loginPromise = fics.login({ login: username, password: password });
+  loginPromise.then(function(data) {
+    mockSocket.close();
+    test.done();
+  });
 }
