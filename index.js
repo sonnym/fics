@@ -113,7 +113,7 @@ FICSClient.prototype.login = function(user_data) {
     }
 
     if (match = data.match(/\*{4} Starting FICS session as (.*) \*{4}/)) {
-      var server_username = match[1];
+      server_username = match[1];
     }
 
     if (data.match(/fics%/)) {

@@ -9,6 +9,10 @@
     "url": "git://github.com/sonnym/fics.git"
   },
 
+  "scripts": {
+    "test": "./node_modules/.bin/nodeunit test/index.js"
+  },
+
   "keywords": [
     "chess",
     "fics"
@@ -17,6 +21,11 @@
   "dependencies": {
     "q": "*",
     "underscore": "*"
+  },
+
+  "devDependencies": {
+    "nodeunit": "*",
+    "sinon": "*"
   },
 
   "author": "Sonny Michaud <michaud.sonny@gmail.com> (https://github.com/sonnym)",

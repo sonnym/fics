@@ -1,0 +1,49 @@
+**** Starting FICS session as GuestTXCW(U) ****
+------------------------------------------------------------------------------
+                         *** Message Of The Day ***
+
+
+Today's Scheduled Events:
+    0430: The Daily 5 0
+    1100: U1800 20 0
+    1300: Fischer Random tournament
+    1900: The Nightly 5 0
+
+
+
+To join a scheduled tournament, join channel 49 (+channel 49)
+And be there for the scheduled start.
+
+For a complete tournament schedule, type "td help schedule"
+Regular tournaments are run all day, "td set tourneyinfo on" to see them.
+
+All times are server times.
+To check the current server time, use "date".
+==============================================================================
+FICS web page: http://www.freechess.org   - add a link to FICS from your page
+==============================================================================
+
+
+Newcomers:
+  type 'help intro_basics' for some basic server commands and files.
+  type 'help chan_4' to learn how to ask for help on the help channel.
+  type 'help register' to learn how to get a registered account.
+  type 'help interfaces' for information on getting a graphical interface.
+  type 'showadmins' to see which admins (FICS administrators) are logged on.
+  type 'set shout 1' to see shouts (only registered users may shout).
+  type 'set seek 0' if receiving ads for matches bothers you.
+  type 'set open 0' if you do not want to be challenged to a chess match.
+  type 'set silence 1' if you wish to have quiet play.
+  type 'getgame' to get a blitz chess game.
+
+Special channels for guests:
+  type 'tell 4 <message>' if you need help
+  type 'tell 53 <message>' to chat with other users
+
+  A quick guide is available on our web page: http://www.freechess.org
+   as are facilities to register, connect via a java interface or download
+   interfaces, so that you get a graphical board and can use the mouse.
+
+NOTE:  Guests with foul or abusive names may be 'nuked' without warning!!!
+
+fics% 
