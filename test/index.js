@@ -21,6 +21,23 @@ exports.test_client_can_be_created = function(test) {
   test.done();
 }
 
+exports.test_guest_login = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixtures(["login_screen", "login_guest_intermezzo", "login_guest_success"]);
+  mockSocket.registerMessage("guest");
+
+  var fics = new FICSClient();
+
+  mockSocket.run();
+
+  var loginPromise = fics.login({});
+  loginPromise.then(function(data) {
+    test.equal(data.username, "GuestTXCW(U)");
+
+    mockSocket.close();
+    test.done();
+  });
+}
 exports.test_user_login = function(test) {
   var username = "foo";
   var password = "bar";
