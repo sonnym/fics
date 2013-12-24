@@ -10,7 +10,9 @@
   },
 
   "scripts": {
-    "test": "./node_modules/.bin/nodeunit test/index.js"
+    "test": "./node_modules/.bin/nodeunit test/index.js",
+    "doc-preview": "./node_modules/.bin/groc",
+    "doc-public": "./node_modules/.bin/groc --gh"
   },
 
   "keywords": [
