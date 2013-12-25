@@ -6,6 +6,15 @@ var _ = require("underscore");
 var fics_host = "freechess.org";
 var fics_port = 5000;
 
+// ## constructor
+//
+// The main object for interacting with the FICS server. Creates a new
+// connection and handles all command processing.
+//
+// ```
+// var FICSClient = require("fics");
+// var fics = new FICSClient();
+// ```
 var FICSClient = function() {
   this.socket = net.connect({ port: fics_port, host: fics_host });
   this.deferred = Q.defer();
