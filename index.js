@@ -59,23 +59,23 @@ FICSClient.prototype.login = function(userData) {
 
   var self = this;
   var deferredLogin = this.lines(function(data) {
-    if (data.match(/login:/)) {
+    if (data.match(/^login:/)) {
       self.sendMessage(username);
     }
 
-    if (data.match(/password:/)) {
+    if (data.match(/^password:/)) {
       self.sendMessage(password);
     }
 
-    if (data.match(/Press return/)) {
+    if (data.match(/^Press return/)) {
       self.sendMessage("");
     }
 
-    if (match = data.match(/\*{4} Starting FICS session as (.*) \*{4}/)) {
+    if (match = data.match(/^\*{4} Starting FICS session as (.*) \*{4}$/)) {
       serverUsername = match[1];
     }
 
-    if (data.match(/fics%/)) {
+    if (data.match(/^fics%$/)) {
       self.issueCommand("set seek 0");
       deferredLogin.resolve({ username: serverUsername });
     }
@@ -109,11 +109,11 @@ FICSClient.prototype.channelList = function() {
   this.sendMessage("help channel_list");
 
   this.issueCommand("help channel_list", deferredChannels.promise, function(data) {
-    if (data.match(/Last Modified/)) {
+    if (data.match(/^Last Modified/)) {
       deferredChannels.resolve(channels);
     }
 
-    if (data.match(/SPECIAL NOTE/)) {
+    if (data.match(/^SPECIAL NOTE$/)) {
       stopMatching = true;
     }
 
@@ -162,7 +162,7 @@ FICSClient.prototype.games = function() {
   var match = null;
 
   this.issueCommand("games", deferredGames.promise, function(data) {
-    if (match = data.match(/(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)/)) {
+    if (match = data.match(/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/)) {
       games.push({ number: match[1]
                  , white: { name: match[3], rating: match[2], time: match[6] }
                  , black: { name: match[5], rating: match[4], time: match[7] }
@@ -170,7 +170,7 @@ FICSClient.prototype.games = function() {
                  });
     }
 
-    if (data.match(/\d+ games displayed./)) {
+    if (data.match(/^\d+ games displayed.$/)) {
       deferredGames.resolve(games);
     }
   });
@@ -189,7 +189,7 @@ FICSClient.prototype.awaitNext = function() {
   var self = this;
 
   var pagingPromise = this.lines(function(data) {
-    if (data.match(/Type \[next\] to see next page\./)) {
+    if (data.match(/^Type \[next\] to see next page\.$/)) {
       pagingPromise.resolve();
 
       self.awaitNext();
@@ -228,7 +228,7 @@ FICSClient.prototype.lines = function(callback) {
     }
 
     _.each(lines, function(line) {
-      deferredData.notify(line);
+      deferredData.notify(line.trim());
     });
   }
 
@@ -254,7 +254,7 @@ FICSClient.prototype.issueCommand = function(command, promise, callback) {
     promise = deferred.promise;
 
     callback = function(data) {
-      if (data.match(/fics%/)) {
+      if (data.match(/^fics%$/)) {
         deferred.resolve();
       }
     }
