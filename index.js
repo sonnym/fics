@@ -190,10 +190,10 @@ FICSClient.prototype.awaitNext = function() {
 
   var pagingPromise = this.lines(function(data) {
     if (data.match(/Type \[next\] to see next page\./)) {
-      self.sendMessage("next");
-      self.awaitNext();
-
       pagingPromise.resolve();
+
+      self.awaitNext();
+      self.sendMessage("next");
     }
   });
 };
