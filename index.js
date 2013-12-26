@@ -30,7 +30,8 @@ var FICSClient = function() {
     self.deferred.notify(data.toString());
   });
 
-  this.promise.then(null, null, function(data) {
+  /* always issue next command when prompted to do so */
+  this.lines(function(data) {
     if (data.match(/Type \[next\] to see next page\./)) {
       self.send_message("next");
     }
