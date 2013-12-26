@@ -68,7 +68,7 @@ exports.test_channel_list = function(test) {
 
   var fics = new FICSClient();
 
-  var channelListPromise = fics.channel_list();
+  var channelListPromise = fics.channelList();
   channelListPromise.then(function(channels) {
     test.equal(72, channels.length);
 

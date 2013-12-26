@@ -7,8 +7,8 @@ var net = require("net");
 var Q = require("q");
 var _ = require("underscore");
 
-var fics_host = "freechess.org";
-var fics_port = 5000;
+var ficsHost = "freechess.org";
+var ficsPort = 5000;
 
 // ## FICSClient
 //
@@ -22,38 +22,38 @@ var fics_port = 5000;
 //
 // @constructor
 var FICSClient = function() {
-  this.socket = net.connect({ port: fics_port, host: fics_host });
-  this.command_queue = [];
+  this.socket = net.connect({ port: ficsPort, host: ficsHost });
+  this.commandQueue = [];
 
-  this.await_next();
+  this.awaitNext();
 };
 
-// ### await_next
+// ### awaitNext
 //
 // Creates a promise that monitors the text stream for next page prompts, sends
 // a next command, then starts the process all over again before discarding
 // the promise
 //
 // @private
-FICSClient.prototype.await_next = function() {
+FICSClient.prototype.awaitNext = function() {
   var self = this;
 
   var pagingPromise = this.lines(function(data) {
     if (data.match(/Type \[next\] to see next page\./)) {
-      self.send_message("next");
-      self.await_next();
+      self.sendMessage("next");
+      self.awaitNext();
 
       pagingPromise.resolve();
     }
   });
 };
 
-// ### get_stream
+// ### getStream
 //
 // Provides access to the raw data received from the FICS server
 //
 // @return {function} The emitter function of sthe socket.
-FICSClient.prototype.get_stream = function() {
+FICSClient.prototype.getStream = function() {
   return this.socket.on;
 };
 
@@ -68,32 +68,32 @@ FICSClient.prototype.get_stream = function() {
 FICSClient.prototype.lines = function(callback) {
   var self = this;
 
-  var deferred_data = Q.defer();
-  var buffered_data = "";
+  var deferredData = Q.defer();
+  var bufferedData = "";
 
   var lineFn = function(data) {
     var data = data.toString();
-    var lines = (buffered_data + data).split("\n");
+    var lines = (bufferedData + data).split("\n");
 
     if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
-      buffered_data = lines.pop();
+      bufferedData = lines.pop();
     }
 
     _.each(lines, function(line) {
-      deferred_data.notify(line);
+      deferredData.notify(line);
     });
   };
 
   this.socket.on("data", lineFn);
 
-  deferred_data.promise.then(function() {
+  deferredData.promise.then(function() {
     self.socket.removeListener(lineFn);
   }, null, callback);
 
-  return deferred_data;
+  return deferredData;
 };
 
-// ### issue_command
+// ### issueCommand
 //
 // Sends a commands to the FICS server. Internally manaages a queue of commands
 // that run synchronously to prevent interference with each other, then
@@ -103,7 +103,7 @@ FICSClient.prototype.lines = function(callback) {
 // @param {Promise} [promise] An optional promise that will be resolved when
 //                            the command is complete
 // @param {function} [callback] An optional callback function to process lines
-FICSClient.prototype.issue_command = function(command, promise, callback) {
+FICSClient.prototype.issueCommand = function(command, promise, callback) {
   if (arguments.length === 1) {
     var deferred = Q.defer();
     promise = deferred.promise;
@@ -116,33 +116,33 @@ FICSClient.prototype.issue_command = function(command, promise, callback) {
   }
 
   var self = this;
-  this.command_queue.push(function() {
-    var deferred_lines = self.lines(callback);
+  this.commandQueue.push(function() {
+    var deferredLines = self.lines(callback);
 
-    self.send_message(command);
+    self.sendMessage(command);
 
     promise.then(function() {
-      deferred_lines.resolve();
+      deferredLines.resolve();
 
-      self.command_queue.shift();
+      self.commandQueue.shift();
 
-      if (self.command_queue.length > 0) {
-        self.command_queue[0]();
+      if (self.commandQueue.length > 0) {
+        self.commandQueue[0]();
       }
     });
   });
 
-  if (this.command_queue.length === 1) {
-    this.command_queue[0]();
+  if (this.commandQueue.length === 1) {
+    this.commandQueue[0]();
   }
 }
 
-// ### send_message
+// ### sendMessage
 //
 // sends a message with the approriate encoding and termination character
 //
 // @param {string} message a Message to send to the FICS server
-FICSClient.prototype.send_message = function(message) {
+FICSClient.prototype.sendMessage = function(message) {
   this.socket.write(message + "\n", "utf8");
 }
 
@@ -150,47 +150,47 @@ FICSClient.prototype.send_message = function(message) {
 //
 // logs in a user based on the provided data
 //
-// @param {object} user_data Hash with login and password keys
+// @param {object} userData Hash with login and password keys
 // @return {Promise} promise that will resolve with the user login information
-FICSClient.prototype.login = function(user_data) {
-  if (user_data.login) {
-    var username = user_data.login;
-    var password = user_data.password;
+FICSClient.prototype.login = function(userData) {
+  if (userData.login) {
+    var username = userData.login;
+    var password = userData.password;
   } else {
     var username = "guest";
   }
 
   var match = null;
-  var server_username;
+  var serverUsername;
 
   var self = this;
-  var deferred_login = this.lines(function(data) {
+  var deferredLogin = this.lines(function(data) {
     if (data.match(/login:/)) {
-      self.send_message(username);
+      self.sendMessage(username);
     }
 
     if (data.match(/password:/)) {
-      self.send_message(password);
+      self.sendMessage(password);
     }
 
     if (data.match(/Press return/)) {
-      self.send_message("");
+      self.sendMessage("");
     }
 
     if (match = data.match(/\*{4} Starting FICS session as (.*) \*{4}/)) {
-      server_username = match[1];
+      serverUsername = match[1];
     }
 
     if (data.match(/fics%/)) {
-      self.issue_command("set seek 0");
-      deferred_login.resolve({ username: server_username });
+      self.issueCommand("set seek 0");
+      deferredLogin.resolve({ username: serverUsername });
     }
   });
 
-  return deferred_login.promise;
+  return deferredLogin.promise;
 };
 
-// ### channel_list
+// ### channelList
 //
 // Returns a promise that will resolve with a hash of channel data in the
 // format of:
@@ -204,39 +204,39 @@ FICSClient.prototype.login = function(user_data) {
 // ```
 //
 // @return {Promise} The promise to be resolved with channel data
-FICSClient.prototype.channel_list = function() {
-  var deferred_channels = Q.defer();
+FICSClient.prototype.channelList = function() {
+  var deferredChannels = Q.defer();
 
   var channels = [];
   var match = null;
-  var stop_matching = false;
+  var stopMatching = false;
 
-  this.send_message("help channel_list");
+  this.sendMessage("help channel_list");
 
-  this.issue_command("help channel_list", deferred_channels.promise, function(data) {
+  this.issueCommand("help channel_list", deferredChannels.promise, function(data) {
     if (data.match(/Last Modified/)) {
-      deferred_channels.resolve(channels);
+      deferredChannels.resolve(channels);
     }
 
     if (data.match(/SPECIAL NOTE/)) {
-      stop_matching = true;
+      stopMatching = true;
     }
 
     if (match = data.match(/\d+(?:,\d+)*\s.*/g)) {
-      if (stop_matching) {
+      if (stopMatching) {
         return;
       }
 
-      var channel_data = match[0].split(/\s+/);
-      var channel_numbers = channel_data.shift().split(",");
+      var channelData = match[0].split(/\s+/);
+      var channelNumbers = channelData.shift().split(",");
 
-      _.each(channel_numbers, function(channel_number) {
-        channels.push({ number: channel_number, name: channel_data.join(" ") });
+      _.each(channelNumbers, function(channelNumber) {
+        channels.push({ number: channelNumber, name: channelData.join(" ") });
       });
     }
   });
 
-  return deferred_channels.promise;
+  return deferredChannels.promise;
 };
 
 // ### games
@@ -260,12 +260,12 @@ FICSClient.prototype.channel_list = function() {
 //
 // @return {Promise} The promise to be resolved with game data
 FICSClient.prototype.games = function() {
-  var deferred_games = Q.defer();
+  var deferredGames = Q.defer();
 
   var games = [];
   var match = null;
 
-  this.issue_command("games", deferred_games.promise, function(data) {
+  this.issueCommand("games", deferredGames.promise, function(data) {
     if (match = data.match(/(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)/)) {
       games.push({ number: match[1]
                  , white: { name: match[3], rating: match[2], time: match[6] }
@@ -275,11 +275,11 @@ FICSClient.prototype.games = function() {
     }
 
     if (data.match(/\d+ games displayed./)) {
-      deferred_games.resolve(games);
+      deferredGames.resolve(games);
     }
   });
 
-  return deferred_games.promise;
+  return deferredGames.promise;
 };
 
 // export the class
