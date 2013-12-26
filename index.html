@@ -54,23 +54,23 @@ be written to</p>
 
   <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
   <span class="kd">var</span> <span class="nx">deferredLogin</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/login:/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^login:/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">username</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/password:/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^password:/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">password</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Press return/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Press return/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\*{4} Starting FICS session as (.*) \*{4}/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\*{4} Starting FICS session as (.*) \*{4}$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">serverUsername</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/fics%/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set seek 0&quot;</span><span class="p">);</span>
       <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">resolve</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="nx">serverUsername</span> <span class="p">});</span>
     <span class="p">}</span>
@@ -101,11 +101,11 @@ format of:</p>
   <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">);</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Last Modified/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Last Modified/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/SPECIAL NOTE/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^SPECIAL NOTE$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">stopMatching</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
 
@@ -151,7 +151,7 @@ by the server.</p>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)/</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                  <span class="p">,</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">}</span>
                  <span class="p">,</span> <span class="nx">black</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">}</span>
@@ -159,12 +159,84 @@ by the server.</p>
                  <span class="p">});</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\d+ games displayed./</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+ games displayed.$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="observe">observe</h3>
+
+<p>Observe a game currently in progress. The promise is notified of two
+events, the initial data and updates as the game progresses.</p>
+
+<h4 id="initial-data">initial data</h4>
+
+<pre><code>{ white: { name: {string} userName, rating: {string} userRating }
+, black: { name: {string} userName, rating: {string} userRating }
+, rated: {boolean} isRated
+, type: {string} gameType
+, time: { initial: {string} clockInitial
+        , increment: {string} clockIncrement
+        } }
+</code></pre>
+
+<h4 id="updates">updates</h4>
+
+<pre><code>{ position: {string} fenPosition
+, color: {string} lastMoveColor
+, time: {string} lastMoveTimeRemaining }
+</code></pre>
+
+<p>The promise will resolve with the result of the game as a string, e.g. <code>1-0</code>.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>gameNumber can be a number or a string.</strong><br/>(Number of game to observe)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will notify with game updates)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observe</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredObservation</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;observe &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">rating</span> <span class="o">=</span> <span class="s2">&quot; \\((\\d+|\\+{4})\\) &quot;</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="s2">&quot;(\\w+)&quot;</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">newGame</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="s2">&quot;((?:un)?rated) (\\w+) (\\d+) (\\d+)$&quot;</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">newGame</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">,</span> <span class="nx">black</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">,</span> <span class="nx">rated</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;rated&quot;</span>
+                                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">initial</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="nx">increment</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">gameUpdate</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&lt;\\d+&gt; ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}&quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\w+ \\w+ &quot;</span> <span class="o">+</span>
+                                <span class="s2">&quot;(?:\\d+ ){8}(?:.+) \\((\\d+:\\d+)\\)(?:.*)$&quot;</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">gameUpdate</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">position</span><span class="o">:</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^{Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">result</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">([</span><span class="s2">&quot;^Removing game&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="s2">&quot;from observation list\\.$&quot;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))))</span> <span class="p">{</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="awaitnext">awaitNext</h3>
@@ -175,7 +247,7 @@ the promise</p></div></div><div class="code"><div class="wrapper"><span class="n
   <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
 
   <span class="kd">var</span> <span class="nx">pagingPromise</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Type \[next\] to see next page\./</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Type \[next\] to see next page\.$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">pagingPromise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
 
       <span class="nx">self</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
@@ -202,7 +274,13 @@ determines that the promise can be discarded.</p>
   <span class="kd">var</span> <span class="nx">deferredData</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
   <span class="kd">var</span> <span class="nx">bufferedData</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
 
-  <span class="kd">var</span> <span class="nx">lineFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
+
+  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">removeFn</span><span class="p">,</span> <span class="nx">removeFn</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">deferredData</span><span class="p">;</span>
+
+  <span class="kd">function</span> <span class="nx">lineFn</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">(</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">);</span>
 
@@ -211,19 +289,13 @@ determines that the promise can be discarded.</p>
     <span class="p">}</span>
 
     <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">);</span>
+      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">());</span>
     <span class="p">});</span>
-  <span class="p">};</span>
+  <span class="p">}</span>
 
-  <span class="kd">var</span> <span class="nx">removeFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">function</span> <span class="nx">removeFn</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
-  <span class="p">};</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
-
-  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">removeFn</span><span class="p">,</span> <span class="nx">removeFn</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-
-  <span class="k">return</span> <span class="nx">deferredData</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="issuecommand">issueCommand</h3>
@@ -244,7 +316,7 @@ automatically calls the next command if any are remaining.</p>
     <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 
     <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/fics%/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
         <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
       <span class="p">}</span>
     <span class="p">}</span>
@@ -282,4 +354,44 @@ automatically calls the next command if any are remaining.</p>
 <li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sendMessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div></div></body></html>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="ranks2fen">ranks2fen</h3>
+
+<p>Takes a position string like returned by FICS and transforms it into a FEN.
+e.g.
+from:
+  <code>--Q----- -p---pkp p-----p- ----q--- P-p----- -----r-P ---R--PK --------</code>
+to:
+  <code>2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8</code></p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>str must be a string.</strong><br/>(A FICS position)</li>
+</ul>
+
+<p><strong>Returns a string</strong><br/>(A FEN string)</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">ranks</span> <span class="o">=</span> <span class="nx">str</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">ranks</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rank</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">newRank</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">letter</span> <span class="o">=</span> <span class="nx">rank</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">letter</span> <span class="o">===</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+        <span class="nx">letter</span> <span class="o">=</span> <span class="p">(</span><span class="nx">i</span> <span class="o">===</span> <span class="mi">7</span><span class="p">)</span> <span class="o">?</span> <span class="nx">count</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+
+      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">newRank</span> <span class="o">+=</span> <span class="nx">count</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="nx">newRank</span> <span class="o">+=</span> <span class="nx">letter</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">newRank</span><span class="p">;</span>
+  <span class="p">}).</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">);</span>
+<span class="p">};</span></div></div></div></div></body></html>
