@@ -1,3 +1,7 @@
+// # FICS
+//
+// A promise-based library for interacting with the Free Internet Chess Server
+
 var net = require("net");
 
 var Q = require("q");
@@ -6,7 +10,7 @@ var _ = require("underscore");
 var fics_host = "freechess.org";
 var fics_port = 5000;
 
-// ## constructor
+// ## FICSClient
 //
 // The main object for interacting with the FICS server. Creates a new
 // connection and handles all command processing.
@@ -15,6 +19,7 @@ var fics_port = 5000;
 // var FICSClient = require("fics");
 // var fics = new FICSClient();
 // ```
+// @constructor
 var FICSClient = function() {
   this.socket = net.connect({ port: fics_port, host: fics_host });
   this.deferred = Q.defer();
@@ -33,10 +38,24 @@ var FICSClient = function() {
   this.command_queue = [];
 };
 
+// ### promise
+//
+// Provides access to the raw data received from the FICS server
+//
+// @return {Promise}
 FICSClient.prototype.__defineGetter__("promise", function() {
   return this.deferred.promise;
 });
 
+
+// ### lines
+//
+// Creates a new promise and then feeds each line of input to the provided
+// callback. This allows a command to process the stream line-by-line until it
+// determines that the promise can be discarded.
+//
+// @param {function} callback A callback that will be attached to the promise
+// @return {Promise} The promise with attached callback
 FICSClient.prototype.lines = function(callback) {
   var deferred_data = Q.defer();
   var buffered_data = "";
@@ -58,6 +77,16 @@ FICSClient.prototype.lines = function(callback) {
   return deferred_data;
 };
 
+// ### issue_command
+//
+// Sends a commands to the FICS server. Internally manaages a queue of commands
+// that run synchronously to prevent interference with each other, then
+// automatically calls the next command if any are remaining.
+//
+// @param {string} command The text of the command
+// @param {Promise} [promise] An optional promise that will be resolved when
+//                            the command is complete
+// @param {function} [callback] An optional callback function to process lines
 FICSClient.prototype.issue_command = function(command, promise, callback) {
   if (arguments.length === 1) {
     var deferred = Q.defer();
@@ -92,10 +121,21 @@ FICSClient.prototype.issue_command = function(command, promise, callback) {
   }
 }
 
+// ### send_message
+//
+// sends a message with the approriate encoding and termination character
+//
+// @param {string} message a Message to send to the FICS server
 FICSClient.prototype.send_message = function(message) {
   this.socket.write(message + "\n", "utf8");
 }
 
+// ### login
+//
+// logs in a user based on the provided data
+//
+// @param {object} user_data Hash with login and password keys
+// @return {Promise} promise that will resolve with the user login information
 FICSClient.prototype.login = function(user_data) {
   if (user_data.login) {
     var username = user_data.login;
@@ -134,6 +174,12 @@ FICSClient.prototype.login = function(user_data) {
   return deferred_login.promise;
 };
 
+// ### channel_list
+//
+// Returns a promise that will resolve with a hash of channel data in the
+// format of `{ channelNumber: channelName, ... }`
+//
+// @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channel_list = function() {
   var deferred_channels = Q.defer();
 
@@ -169,6 +215,22 @@ FICSClient.prototype.channel_list = function() {
   return deferred_channels.promise;
 };
 
+// ### games
+//
+// Returns a promise that will resolved with an array of data about current
+// games on the server in the format:
+//
+// ```
+// [{ number: gameNumber
+//  , white: { name: userName, rating: userRating: time: timerRemaining }
+//  , black: { name: userName, rating: userRating: time: timerRemaining }
+//  , move: { color: colorToMove, number: moveNumber }
+//  }
+// , ...
+// ]
+// ```
+//
+// @return {Promise} The promise to be resolved with game data
 FICSClient.prototype.games = function() {
   var deferred_games = Q.defer();
 
@@ -192,4 +254,5 @@ FICSClient.prototype.games = function() {
   return deferred_games.promise;
 };
 
+// export the class
 module.exports = FICSClient;
