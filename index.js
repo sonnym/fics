@@ -178,6 +178,75 @@ FICSClient.prototype.games = function() {
   return deferredGames.promise;
 };
 
+// ### observe
+//
+// Observe a game currently in progress. The promise is notified of two
+// events, the initial data and updates as the game progresses.
+//
+// #### initial data
+// ```
+// { white: { name: {string} userName, rating: {string} userRating }
+// , black: { name: {string} userName, rating: {string} userRating }
+// , rated: {boolean} isRated
+// , type: {string} gameType
+// , time: { initial: {string} clockInitial
+//         , increment: {string} clockIncrement
+//         } }
+// ```
+//
+// #### updates
+// ```
+// { position: {string} fenPosition
+// , color: {string} lastMoveColor
+// , time: {string} lastMoveTimeRemaining }
+// ```
+//
+// The promise will resolve with the result of the game as a string, e.g. `1-0`.
+//
+// @public
+// @param {number|string} gameNumber Number of game to observe
+// @return {Promise} A promise that will notify with game updates
+FICSClient.prototype.observe = function(gameNumber) {
+  var deferredObservation = Q.defer();
+
+  var game = gameNumber.toString();
+
+  var result = null;
+  var match = null;
+
+  this.issueCommand("observe " + game, deferredObservation.promise, function(data) {
+    var rating = " \\((\\d+|\\+{4})\\) ";
+    var user = "(\\w+)";
+    var newGame = new RegExp("^Game " + game + ": " + user + rating + user + rating + "((?:un)?rated) (\\w+) (\\d+) (\\d+)$");
+
+    if (match = data.match(newGame)) {
+      deferredObservation.notify({ white: { name: match[1], rating: match[2] }
+                                 , black: { name: match[3], rating: match[4] }
+                                 , rated: match[5] === "rated"
+                                 , type: match[6]
+                                 , time: { initial: match[7], increment: match[8] }
+                                 });
+    }
+
+    var gameUpdate = new RegExp("^<\\d+> ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}" + game + " \\w+ \\w+ " +
+                                "(?:\\d+ ){8}(?:.+) \\((\\d+:\\d+)\\)(?:.*)$");
+
+    if (match = data.match(gameUpdate)) {
+      deferredObservation.notify({ position: ranks2fen(match[1]), color: match[2], time: match[3] });
+    }
+
+    if (match = data.match(new RegExp("^{Game " + game + " \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$"))) {
+      result = match[1];
+    }
+
+    if (data.match(new RegExp(["^Removing game", game, "from observation list\\.$"].join(' ')))) {
+      deferredObservation.resolve(result);
+    }
+  });
+
+  return deferredObservation.promise;
+};
+
 // ### awaitNext
 //
 // Creates a promise that monitors the text stream for next page prompts, sends
@@ -294,3 +363,41 @@ FICSClient.prototype.sendMessage = function(message) {
 
 // export the class
 module.exports = FICSClient;
+
+// ### ranks2fen
+//
+// Takes a position string like returned by FICS and transforms it into a FEN.
+//
+// e.g.
+// from:
+//   `--Q----- -p---pkp p-----p- ----q--- P-p----- -----r-P ---R--PK --------`
+// to:
+//   `2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8`
+//
+// @private
+// @param {string} str A FICS position
+// @return {string} A FEN string
+function ranks2fen(str) {
+  var ranks = str.split(/\s+/);
+
+  return _.map(ranks, function(rank) {
+    var newRank = "";
+
+    for (var i = 0, count = 0; i < 8; i++) {
+      var letter = rank[i];
+
+      if (letter === "-") {
+        count++;
+        letter = (i === 7) ? count.toString() : "";
+
+      } else if (count > 0) {
+        newRank += count.toString();
+        count = 0;
+      }
+
+      newRank += letter;
+    }
+
+    return newRank;
+  }).join("/");
+};

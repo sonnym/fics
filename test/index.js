@@ -91,6 +91,47 @@ exports.test_games = function(test) {
   });
 };
 
+exports.test_observe = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerMessage("observe 47");
+  mockSocket.registerFixture("observation");
+
+  var fics = new FICSClient();
+
+  var notifications =
+    [
+      { white: { name: "CANABLANCA", rating: "1776" }
+      , black: { name: "GriffySr", rating: "2094" }
+      , rated: true
+      , type: "blitz"
+      , time: { initial: "5", increment: "0" }
+      }
+    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/1R5K", color: "W", time: "0:00" }
+    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/3R3K", color: "B", time: "0:08" }
+    , { position: "8/1p1Q1pkp/p2p2p1/5r2/P1p2P2/1q5P/6P1/3R3K", color: "W", time: "0:00" }
+    , { position: "8/1p1Q1pkp/p2R2p1/5r2/P1p2P2/1q5P/6P1/7K", color: "B", time: "0:03" }
+    , { position: "8/1p1Q1pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K", color: "W", time: "0:00" }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K", color: "B", time: "0:17" }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6P1/1q5K", color: "W", time: "0:00" }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6PK/1q6", color: "B", time: "0:02" }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8", color: "W", time: "0:00" }
+    , { position: "2Q5/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8", color: "B", time: "0:15" }
+    , { position: "2Q5/1p3pkp/p2R2p1/4q3/P1p2r2/7P/6PK/8", color: "W", time: "0:00" }
+    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p2r2/7P/3R2PK/8", color: "B", time: "0:15" }
+    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8", color: "W", time: "0:00" }
+    ];
+
+  var observationPromise = fics.observe(47);
+  observationPromise.then(function(result) {
+    test.equal("0-1", result);
+
+    mockSocket.close();
+    test.done();
+  }, null, function(data) {
+    test.deepEqual(notifications.shift(), data);
+  });
+};
+
 exports.test_getSocket = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("login_screen");

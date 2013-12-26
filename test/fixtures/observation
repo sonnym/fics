@@ -1,0 +1,48 @@
+Game 47: CANABLANCA (1776) GriffySr (2094) rated blitz 5 0
+
+<12> -------- -p-Q-pkp pq-p--p- -----r-- P-p--P-- -P-----P ------P- -R-----K W -1 0 0 0 0 1 47 CANABLANCA GriffySr 0 5 0 19 21 158 296 35 R/e5-f5 (0:00) Rf5 0 1 0
+fics% 
+<12> r-b-k--N ppp-q-pp -----n-- --bPp--- --P----- -------- PPP--PPP RNBQK--R B -1 1 1 0 1 0 8 seetripuu stewarty 0 20 10 36 29 917 1207 9 P/d3-c4 (0:15) dxc4 0 1 705
+fics% 
+<12> r-b-k--N ppp-q-pp -----n-- ---Pp--- --P----- -------- PPP--bPP RNBQK--R W -1 1 1 0 1 0 8 seetripuu stewarty 0 20 10 35 29 917 1214 10 B/c5-f2 (0:03) Bxf2+ 0 1 78
+fics% 
+<12> -------- -p-Q-pkp pq-p--p- -----r-- P-p--P-- -P-----P ------P- ---R---K B -1 0 0 0 0 2 47 CANABLANCA GriffySr 0 5 0 19 21 153 296 35 R/b1-d1 (0:08) Rd1 0 1 74
+fics% 
+<12> -------- -p-Q-pkp p--p--p- -----r-- P-p--P-- -q-----P ------P- ---R---K W -1 0 0 0 0 0 47 CANABLANCA GriffySr 0 5 0 18 21 153 296 36 Q/b6-b3 (0:00) Qxb3 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-3.74; nps=14K; time=0.12; egtb=0
+fics% 
+<12> -------- -p-Q-pkp p--R--p- -----r-- P-p--P-- -q-----P ------P- -------K B -1 0 0 0 0 0 47 CANABLANCA GriffySr 0 5 0 18 20 151 296 36 R/d1-d6 (0:03) Rxd6 0 1 51
+fics% 
+<12> -------- -p-Q-pkp p--R--p- -------- P-p--r-- -q-----P ------P- -------K W -1 0 0 0 0 0 47 CANABLANCA GriffySr 0 5 0 17 20 151 296 37 R/f5-f4 (0:00) Rxf4 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-4.19; nps=15K; time=0.14; egtb=0
+fics% 
+<12> ----Q--- -p---pkp p--R--p- -------- P-p--r-- -q-----P ------P- -------K B -1 0 0 0 0 1 47 CANABLANCA GriffySr 0 5 0 17 20 133 296 37 Q/d7-e8 (0:17) Qe8 0 1 75
+fics% 
+<12> ----Q--- -p---pkp p--R--p- -------- P-p--r-- -------P ------P- -q-----K W -1 0 0 0 0 2 47 CANABLANCA GriffySr 0 5 0 17 20 133 296 38 Q/b3-b1 (0:00) Qb1+ 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-4.22; nps=43K; time=0.07; egtb=0
+fics% 
+<12> ----Q--- -p---pkp p--R--p- -------- P-p--r-- -------P ------PK -q------ B -1 0 0 0 0 3 47 CANABLANCA GriffySr 0 5 0 17 20 132 296 38 K/h1-h2 (0:02) Kh2 0 1 55
+fics% 
+<12> ----Q--- -p---pkp p--R--p- -------- P-p-qr-- -------P ------PK -------- W -1 0 0 0 0 4 47 CANABLANCA GriffySr 0 5 0 17 20 132 295 39 Q/b1-e4 (0:00) Qe4 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-4.33; nps=26K; time=0.06; egtb=0
+fics% 
+<12> --Q----- -p---pkp p--R--p- -------- P-p-qr-- -------P ------PK -------- B -1 0 0 0 0 5 47 CANABLANCA GriffySr 0 5 0 17 20 117 295 39 Q/e8-c8 (0:15) Qc8 0 1 70
+fics% 
+<12> --Q----- -p---pkp p--R--p- ----q--- P-p--r-- -------P ------PK -------- W -1 0 0 0 0 6 47 CANABLANCA GriffySr 0 5 0 17 20 117 295 40 Q/e4-e5 (0:00) Qe5 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-10.05; nps=33K; time=0.15; egtb=0
+fics% 
+<12> --Q----- -p---pkp p-----p- ----q--- P-p--r-- -------P ---R--PK -------- B -1 0 0 0 0 7 47 CANABLANCA GriffySr 0 5 0 17 20 102 295 40 R/d6-d2 (0:15) Rd2 0 1 53
+fics% 
+<12> --Q----- -p---pkp p-----p- ----q--- P-p----- -----r-P ---R--PK -------- W -1 0 0 0 0 8 47 CANABLANCA GriffySr 0 5 0 17 20 102 295 41 R/f4-f3 (0:00) Rf3+ 0 1 0
+fics% 
+GriffySr(C)(2094)[47] whispers: ply=4; eval=-11.31; nps=53K; time=0.08; egtb=0
+fics% 
+{Game 47 (CANABLANCA vs. GriffySr) CANABLANCA resigns} 0-1
+fics% 
+Removing game 47 from observation list.
+fics% 
