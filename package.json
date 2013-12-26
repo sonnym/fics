@@ -1,6 +1,6 @@
 {
   "name": "fics",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A promise-based interface for the Free Internet Chess Server",
   "main": "index.js",
 
