@@ -59,3 +59,20 @@ exports.test_user_login = function(test) {
     test.done();
   });
 }
+
+exports.test_channel_list = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerMessage("help channel_list");
+  mockSocket.registerFixtures(["channel_list_page1", "channel_list_page2", "channel_list_page3",
+                               "channel_list_page4", "channel_list_page5"]);
+
+  var fics = new FICSClient();
+
+  var channelListPromise = fics.channel_list();
+  channelListPromise.then(function(channels) {
+    test.equal(72, channels.length);
+
+    mockSocket.close();
+    test.done();
+  });
+}

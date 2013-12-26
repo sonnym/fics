@@ -176,7 +176,14 @@ FICSClient.prototype.login = function(user_data) {
 // ### channel_list
 //
 // Returns a promise that will resolve with a hash of channel data in the
-// format of `{ channelNumber: channelName, ... }`
+// format of:
+//
+// ```
+// [{ number: channelNumber
+//  , name: channelName
+//  }
+// , ...
+// ]
 //
 // @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channel_list = function() {
