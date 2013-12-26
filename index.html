@@ -22,12 +22,13 @@ var fics = new FICSClient();
   <span class="k">this</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
-<h3 id="getstream">getStream</h3>
+<h3 id="getsocket">getSocket</h3>
 
-<p>Provides access to the raw data received from the FICS server</p>
+<p>Provides access to the raw data received from the FICS server, but is not to
+be written to</p>
 
-<p><strong>Returns a function</strong><br/>(The emitter function of sthe socket.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getStream</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">;</span>
+<p><strong>Returns an EventEmitter</strong><br/>(The socket itself)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getSocket</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
 <h3 id="login">login</h3>
