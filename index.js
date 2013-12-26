@@ -90,8 +90,8 @@ FICSClient.prototype.login = function(userData) {
 // format of:
 //
 // ```
-// [{ number: channelNumber
-//  , name: channelName
+// [{ number: {string} channelNumber
+//  , name: {string} channelName
 //  }
 // , ...
 // ]
@@ -138,10 +138,10 @@ FICSClient.prototype.channelList = function() {
 // games on the server in the format:
 //
 // ```
-// [{ number: gameNumber
-//  , white: { name: userName, rating: userRating: time: timerRemaining }
-//  , black: { name: userName, rating: userRating: time: timerRemaining }
-//  , move: { color: colorToMove, number: moveNumber }
+// [{ number: {string} gameNumber
+//  , white: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
+//  , black: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
+//  , move: { color: {string} colorToMove, number: {string} moveNumber }
 //  }
 // , ...
 // ]
