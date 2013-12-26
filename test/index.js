@@ -7,7 +7,7 @@ var FICSClient = require(path.join(__filename, "..", ".."));
 
 var MockSocket = require("./mock_socket");
 
-exports.test_client_can_be_created = function(test) {
+exports.testClientCanBeCreated = function(test) {
   var mockConnection = sinon.mock(net);
   mockConnection.expects("connect")
                 .withExactArgs({ host: "freechess.org", port: 5000 })
@@ -21,7 +21,7 @@ exports.test_client_can_be_created = function(test) {
   test.done();
 };
 
-exports.test_guest_login = function(test) {
+exports.testguestLogin = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixtures(["login_screen", "login_guest_intermezzo", "login_guest_success"]);
   mockSocket.registerMessage("guest");
@@ -39,7 +39,7 @@ exports.test_guest_login = function(test) {
   });
 };
 
-exports.test_user_login = function(test) {
+exports.testUserLogin = function(test) {
   var username = "foo";
   var password = "bar";
 
@@ -60,7 +60,7 @@ exports.test_user_login = function(test) {
   });
 };
 
-exports.test_channel_list = function(test) {
+exports.testChannelList = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerMessage("help channel_list");
   mockSocket.registerFixtures(["channel_list_page1", "channel_list_page2", "channel_list_page3",
@@ -77,7 +77,7 @@ exports.test_channel_list = function(test) {
   });
 };
 
-exports.test_who = function(test) {
+exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("who");
   mockSocket.registerMessage("who");
@@ -92,7 +92,7 @@ exports.test_who = function(test) {
   });
 };
 
-exports.test_games = function(test) {
+exports.testGames = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerMessage("games");
   mockSocket.registerFixture("games");
@@ -106,7 +106,7 @@ exports.test_games = function(test) {
   });
 };
 
-exports.test_observe = function(test) {
+exports.testObserve = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerMessage("observe 47");
   mockSocket.registerFixture("observation");
@@ -147,7 +147,7 @@ exports.test_observe = function(test) {
   });
 };
 
-exports.test_sought = function(test) {
+exports.testSought = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("sought");
   mockSocket.registerMessage("sought");
@@ -161,7 +161,7 @@ exports.test_sought = function(test) {
   });
 };
 
-exports.test_getSocket = function(test) {
+exports.testGetSocket = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("login_screen");
 
