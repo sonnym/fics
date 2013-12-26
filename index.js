@@ -132,6 +132,50 @@ FICSClient.prototype.channelList = function() {
   return deferredChannels.promise;
 };
 
+// ### who
+//
+// Returns a promise that will be resolved with users in the following format.
+//
+// ```
+// [{ name: {string} userName
+//  , rating: {string} userRating
+//  , status: {string} userStatus
+//  , codes: {array} server
+//  }
+// ,...
+// ]
+// ```
+//
+// @public
+// @return {Promise} To be resolved with user data.
+FICSClient.prototype.who = function() {
+  var users = [];
+
+  var match = null;
+  var deferredUsers = this.issueCommand("who", function(data) {
+    _.each(data.split(/\s{2,}/), function(datum) {
+      if (match = datum.match(/^(\d+|[+-]{4})([\^~:#'&. ])(\w+)((?:\([*A-Z]+\))*)$/)) {
+        var codes = [];
+
+        if (match[4]) {
+          codes = match[4].substr(1, match[4].length - 2).split(")(");
+        }
+
+        users.push({ name: match[3]
+                   , rating: match[1]
+                   , status: match[2]
+                   , codes: codes });
+      }
+    });
+
+    if (data.match(/^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/)) {
+      deferredUsers.resolve(users);
+    }
+  });
+
+  return deferredUsers.promise;
+};
+
 // ### games
 //
 // Returns a promise that will resolved with an array of data about current
