@@ -23,12 +23,9 @@ var fics_port = 5000;
 // @constructor
 var FICSClient = function() {
   this.socket = net.connect({ port: fics_port, host: fics_host });
-  this.deferred = Q.defer();
+  this.command_queue = [];
 
   var self = this;
-  this.socket.on("data", function(data) {
-    self.deferred.notify(data.toString());
-  });
 
   /* always issue next command when prompted to do so */
   this.lines(function(data) {
@@ -36,18 +33,16 @@ var FICSClient = function() {
       self.send_message("next");
     }
   });
-
-  this.command_queue = [];
 };
 
-// ### promise
+// ### get_stream
 //
 // Provides access to the raw data received from the FICS server
 //
-// @return {Promise}
-FICSClient.prototype.__defineGetter__("promise", function() {
-  return this.deferred.promise;
-});
+// @return {function} The emitter function of sthe socket.
+FICSClient.prototype.get_stream = function() {
+  return this.socket.on;
+};
 
 // ### lines
 //
