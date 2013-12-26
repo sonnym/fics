@@ -241,6 +241,49 @@ FICSClient.prototype.observe = function(gameNumber) {
   return deferredObservation.promise;
 };
 
+// ### sought
+//
+// Get an objecting representing all the games currently awaiting players.
+//
+// The games will be presented in the following format:
+//
+// ```
+// [{ number: {string} gameNumber
+//  , user: { name: {string} userName, rating: {string} userRating }
+//  , time: { initial: {string} clockInitial, increment: {string} clockIncrement }
+//  , rated: {boolean} isRated
+//  , type: {string} gameType
+//  , range: {string} allowedRatingRange
+//  }
+// , ...
+// ]
+// ```
+//
+// @public
+// @return {Promise} A promise that will resolve with the structure of games.
+FICSClient.prototype.sought = function() {
+  var games = [];
+  var match = null;
+
+  var deferredSought = this.issueCommand("sought", function(data) {
+    if (match = data.match(/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/)) {
+      games.push({ game: match[1]
+                 , user: { name: match[2], rating: match[3] }
+                 , time: { initial: match[4], increment: match[5] }
+                 , rated: match[6] === "rated"
+                 , type: match[7]
+                 , range: match[8]
+                 });
+    }
+
+    if (data.match(/^\d+ ads displayed\.$/)) {
+      deferredSought.resolve(games);
+    };
+  });
+
+  return deferredSought.promise;
+};
+
 // ### awaitNext
 //
 // Creates a promise that monitors the text stream for next page prompts, sends

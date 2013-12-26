@@ -132,6 +132,20 @@ exports.test_observe = function(test) {
   });
 };
 
+exports.test_sought = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("sought");
+  mockSocket.registerMessage("sought");
+
+  var fics = new FICSClient();
+  var deferredSought = fics.sought().then(function(games) {
+    test.equal(41, games.length)
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
 exports.test_getSocket = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("login_screen");
