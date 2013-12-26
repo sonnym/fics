@@ -86,7 +86,6 @@ exports.test_who = function(test) {
 
   fics.who().then(function(users) {
     test.equal(1831, users.length);
-    console.log(users);
 
     mockSocket.close();
     test.done();
