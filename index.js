@@ -25,12 +25,25 @@ var FICSClient = function() {
   this.socket = net.connect({ port: fics_port, host: fics_host });
   this.command_queue = [];
 
+  this.await_next();
+};
+
+// ### await_next
+//
+// Creates a promise that monitors the text stream for next page prompts, sends
+// a next command, then starts the process all over again before discarding
+// the promise
+//
+// @private
+FICSClient.prototype.await_next = function() {
   var self = this;
 
-  /* always issue next command when prompted to do so */
-  this.lines(function(data) {
+  var pagingPromise = this.lines(function(data) {
     if (data.match(/Type \[next\] to see next page\./)) {
       self.send_message("next");
+      self.await_next();
+
+      pagingPromise.resolve();
     }
   });
 };
