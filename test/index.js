@@ -76,3 +76,17 @@ exports.test_channel_list = function(test) {
     test.done();
   });
 }
+
+exports.test_games = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerMessage("games");
+  mockSocket.registerFixture("games");
+
+  var fics = new FICSClient();
+  fics.games().then(function(games) {
+    test.equal(318, games.length);
+
+    mockSocket.close();
+    test.done();
+  });
+}

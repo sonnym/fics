@@ -237,6 +237,10 @@ FICSClient.prototype.channel_list = function() {
 // ]
 // ```
 //
+// Currently does not capture games being examined and, e.g. lectures by
+// LectureBot, so the length of the list is shorter than the length returned
+// by the server.
+//
 // @return {Promise} The promise to be resolved with game data
 FICSClient.prototype.games = function() {
   var deferred_games = Q.defer();
