@@ -60,7 +60,8 @@ FICSClient.prototype.lines = function(callback) {
   var deferred_data = Q.defer();
   var buffered_data = "";
 
-  this.promise.then(null, null, function(data) {
+  this.socket.on("data", function(data) {
+    var data = data.toString();
     var lines = (buffered_data + data).split("\n");
 
     if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
