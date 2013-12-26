@@ -102,7 +102,6 @@ FICSClient.prototype.login = function(userData) {
 FICSClient.prototype.channelList = function() {
   var channels = [];
   var match = null;
-  var stopMatching = false;
 
   this.sendMessage("help channel_list");
 
@@ -111,20 +110,10 @@ FICSClient.prototype.channelList = function() {
       deferredChannels.resolve(channels);
     }
 
-    if (data.match(/^SPECIAL NOTE$/)) {
-      stopMatching = true;
-    }
 
-    if (match = data.match(/\d+(?:,\d+)*\s.*/g)) {
-      if (stopMatching) {
-        return;
-      }
-
-      var channelData = match[0].split(/\s+/);
-      var channelNumbers = channelData.shift().split(",");
-
-      _.each(channelNumbers, function(channelNumber) {
-        channels.push({ number: channelNumber, name: channelData.join(" ") });
+    if (match = data.match(/^(\d+(?:,\d+)*)\s+(.*)$/)) {
+      _.each(match[1].split(","), function(channelNumber) {
+        channels.push({ number: channelNumber, name: match[2]});
       });
     }
   });
