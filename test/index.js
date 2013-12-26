@@ -38,6 +38,7 @@ exports.test_guest_login = function(test) {
     test.done();
   });
 }
+
 exports.test_user_login = function(test) {
   var username = "foo";
   var password = "bar";
