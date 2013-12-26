@@ -28,128 +28,21 @@ var FICSClient = function() {
   this.awaitNext();
 };
 
-// ### awaitNext
-//
-// Creates a promise that monitors the text stream for next page prompts, sends
-// a next command, then starts the process all over again before discarding
-// the promise
-//
-// @private
-FICSClient.prototype.awaitNext = function() {
-  var self = this;
-
-  var pagingPromise = this.lines(function(data) {
-    if (data.match(/Type \[next\] to see next page\./)) {
-      self.sendMessage("next");
-      self.awaitNext();
-
-      pagingPromise.resolve();
-    }
-  });
-};
-
 // ### getStream
 //
 // Provides access to the raw data received from the FICS server
 //
+// @public
 // @return {function} The emitter function of sthe socket.
 FICSClient.prototype.getStream = function() {
   return this.socket.on;
 };
 
-// ### lines
-//
-// Creates a new promise and then feeds each line of input to the provided
-// callback. This allows a command to process the stream line-by-line until it
-// determines that the promise can be discarded.
-//
-// @param {function} callback A callback that will be attached to the promise
-// @return {Promise} The promise with attached callback
-FICSClient.prototype.lines = function(callback) {
-  var self = this;
-
-  var deferredData = Q.defer();
-  var bufferedData = "";
-
-  var lineFn = function(data) {
-    var data = data.toString();
-    var lines = (bufferedData + data).split("\n");
-
-    if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
-      bufferedData = lines.pop();
-    }
-
-    _.each(lines, function(line) {
-      deferredData.notify(line);
-    });
-  };
-
-  this.socket.on("data", lineFn);
-
-  deferredData.promise.then(function() {
-    self.socket.removeListener(lineFn);
-  }, null, callback);
-
-  return deferredData;
-};
-
-// ### issueCommand
-//
-// Sends a commands to the FICS server. Internally manaages a queue of commands
-// that run synchronously to prevent interference with each other, then
-// automatically calls the next command if any are remaining.
-//
-// @param {string} command The text of the command
-// @param {Promise} [promise] An optional promise that will be resolved when
-//                            the command is complete
-// @param {function} [callback] An optional callback function to process lines
-FICSClient.prototype.issueCommand = function(command, promise, callback) {
-  if (arguments.length === 1) {
-    var deferred = Q.defer();
-    promise = deferred.promise;
-
-    callback = function(data) {
-      if (data.match(/fics%/)) {
-        deferred.resolve();
-      }
-    }
-  }
-
-  var self = this;
-  this.commandQueue.push(function() {
-    var deferredLines = self.lines(callback);
-
-    self.sendMessage(command);
-
-    promise.then(function() {
-      deferredLines.resolve();
-
-      self.commandQueue.shift();
-
-      if (self.commandQueue.length > 0) {
-        self.commandQueue[0]();
-      }
-    });
-  });
-
-  if (this.commandQueue.length === 1) {
-    this.commandQueue[0]();
-  }
-}
-
-// ### sendMessage
-//
-// sends a message with the approriate encoding and termination character
-//
-// @param {string} message a Message to send to the FICS server
-FICSClient.prototype.sendMessage = function(message) {
-  this.socket.write(message + "\n", "utf8");
-}
-
 // ### login
 //
 // logs in a user based on the provided data
 //
+// @public
 // @param {object} userData Hash with login and password keys
 // @return {Promise} promise that will resolve with the user login information
 FICSClient.prototype.login = function(userData) {
@@ -203,6 +96,7 @@ FICSClient.prototype.login = function(userData) {
 // ]
 // ```
 //
+// @public
 // @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channelList = function() {
   var deferredChannels = Q.defer();
@@ -258,6 +152,7 @@ FICSClient.prototype.channelList = function() {
 // LectureBot, so the length of the list is shorter than the length returned
 // by the server.
 //
+// @public
 // @return {Promise} The promise to be resolved with game data
 FICSClient.prototype.games = function() {
   var deferredGames = Q.defer();
@@ -280,6 +175,118 @@ FICSClient.prototype.games = function() {
   });
 
   return deferredGames.promise;
+};
+
+// ### awaitNext
+//
+// Creates a promise that monitors the text stream for next page prompts, sends
+// a next command, then starts the process all over again before discarding
+// the promise
+//
+// @private
+FICSClient.prototype.awaitNext = function() {
+  var self = this;
+
+  var pagingPromise = this.lines(function(data) {
+    if (data.match(/Type \[next\] to see next page\./)) {
+      self.sendMessage("next");
+      self.awaitNext();
+
+      pagingPromise.resolve();
+    }
+  });
+};
+
+// ### lines
+//
+// Creates a new promise and then feeds each line of input to the provided
+// callback. This allows a command to process the stream line-by-line until it
+// determines that the promise can be discarded.
+//
+// @private
+// @param {function} callback A callback that will be attached to the promise
+// @return {Promise} The promise with attached callback
+FICSClient.prototype.lines = function(callback) {
+  var self = this;
+
+  var deferredData = Q.defer();
+  var bufferedData = "";
+
+  var lineFn = function(data) {
+    var data = data.toString();
+    var lines = (bufferedData + data).split("\n");
+
+    if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
+      bufferedData = lines.pop();
+    }
+
+    _.each(lines, function(line) {
+      deferredData.notify(line);
+    });
+  };
+
+  this.socket.on("data", lineFn);
+
+  deferredData.promise.then(function() {
+    self.socket.removeListener(lineFn);
+  }, null, callback);
+
+  return deferredData;
+};
+
+// ### issueCommand
+//
+// Sends a commands to the FICS server. Internally manaages a queue of commands
+// that run synchronously to prevent interference with each other, then
+// automatically calls the next command if any are remaining.
+//
+// @private
+// @param {string} command The text of the command
+// @param {Promise} [promise] An optional promise that will be resolved when
+//                            the command is complete
+// @param {function} [callback] An optional callback function to process lines
+FICSClient.prototype.issueCommand = function(command, promise, callback) {
+  if (arguments.length === 1) {
+    var deferred = Q.defer();
+    promise = deferred.promise;
+
+    callback = function(data) {
+      if (data.match(/fics%/)) {
+        deferred.resolve();
+      }
+    }
+  }
+
+  var self = this;
+  this.commandQueue.push(function() {
+    var deferredLines = self.lines(callback);
+
+    self.sendMessage(command);
+
+    promise.then(function() {
+      deferredLines.resolve();
+
+      self.commandQueue.shift();
+
+      if (self.commandQueue.length > 0) {
+        self.commandQueue[0]();
+      }
+    });
+  });
+
+  if (this.commandQueue.length === 1) {
+    this.commandQueue[0]();
+  }
+};
+
+// ### sendMessage
+//
+// sends a message with the approriate encoding and termination character
+//
+// @private
+// @param {string} message a Message to send to the FICS server
+FICSClient.prototype.sendMessage = function(message) {
+  this.socket.write(message + "\n", "utf8");
 };
 
 // export the class
