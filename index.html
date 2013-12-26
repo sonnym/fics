@@ -5,8 +5,8 @@
 <span class="kd">var</span> <span class="nx">Q</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;q&quot;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;underscore&quot;</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">fics_host</span> <span class="o">=</span> <span class="s2">&quot;freechess.org&quot;</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">fics_port</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
+<span class="kd">var</span> <span class="nx">ficsHost</span> <span class="o">=</span> <span class="s2">&quot;freechess.org&quot;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">ficsPort</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
 
 <h2 id="ficsclient">FICSClient</h2>
 
@@ -16,159 +16,69 @@ connection and handles all command processing.</p>
 <pre><code>var FICSClient = require("fics");
 var fics = new FICSClient();
 </code></pre></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">FICSClient</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="nx">net</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span> <span class="nx">port</span><span class="o">:</span> <span class="nx">fics_port</span><span class="p">,</span> <span class="nx">host</span><span class="o">:</span> <span class="nx">fics_host</span> <span class="p">});</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="nx">net</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span> <span class="nx">port</span><span class="o">:</span> <span class="nx">ficsPort</span><span class="p">,</span> <span class="nx">host</span><span class="o">:</span> <span class="nx">ficsHost</span> <span class="p">});</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span> <span class="o">=</span> <span class="p">[];</span>
 
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">deferred</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
-  <span class="p">});</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Type \[next\] to see next page\./</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span> <span class="o">=</span> <span class="p">[];</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="promise">promise</h3>
+<h3 id="getstream">getStream</h3>
 
 <p>Provides access to the raw data received from the FICS server</p>
 
-<p><strong>Returns a Promise</strong></p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="s2">&quot;promise&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">});</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="lines">lines</h3>
+<p><strong>Returns a function</strong><br/>(The emitter function of sthe socket.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getStream</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
-<p>Creates a new promise and then feeds each line of input to the provided
-callback. This allows a command to process the stream line-by-line until it
-determines that the promise can be discarded.</p>
-
-<p>Parameters:</p>
-
-<ul>
-<li><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</li>
-</ul>
-
-<p><strong>Returns a Promise</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferred_data</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">buffered_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">(</span><span class="nx">buffered_data</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">);</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">buffered_data</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
-    <span class="p">}</span>
-
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferred_data</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">);</span>
-    <span class="p">});</span>
-  <span class="p">});</span>
-
-  <span class="nx">deferred_data</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-
-  <span class="k">return</span> <span class="nx">deferred_data</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="issue-command">issue_command</h3>
-
-<p>Sends a commands to the FICS server. Internally manaages a queue of commands
-that run synchronously to prevent interference with each other, then
-automatically calls the next command if any are remaining.</p>
-
-<p>Parameters:</p>
-
-<ul>
-<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
-<li><p><strong>promise is optional and must be a Promise.</strong><br/>(An optional promise that will be resolved when the command is complete)</p></li>
-<li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
-</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issue_command</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">promise</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-    <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-
-    <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/fics%/</span><span class="p">))</span> <span class="p">{</span>
-        <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">deferred_lines</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
-
-    <span class="nx">self</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
-
-    <span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-      <span class="nx">deferred_lines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-
-      <span class="nx">self</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
-
-      <span class="k">if</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">self</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
-      <span class="p">}</span>
-    <span class="p">});</span>
-  <span class="p">});</span>
-
-  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
-  <span class="p">}</span>
-<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="send-message">send_message</h3>
-
-<p>sends a message with the approriate encoding and termination character</p>
-
-<p>Parameters:</p>
-
-<ul>
-<li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
-</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">send_message</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
-<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="login">login</h3>
+<h3 id="login">login</h3>
 
 <p>logs in a user based on the provided data</p>
 
 <p>Parameters:</p>
 
 <ul>
-<li><strong>user_data must be an object.</strong><br/>(Hash with login and password keys)</li>
+<li><strong>userData must be an object.</strong><br/>(Hash with login and password keys)</li>
 </ul>
 
-<p><strong>Returns a Promise</strong><br/>(promise that will resolve with the user login information)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">login</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user_data</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">user_data</span><span class="p">.</span><span class="nx">login</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">user_data</span><span class="p">.</span><span class="nx">login</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">password</span> <span class="o">=</span> <span class="nx">user_data</span><span class="p">.</span><span class="nx">password</span><span class="p">;</span>
+<p><strong>Returns a Promise</strong><br/>(promise that will resolve with the user login information)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">login</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">userData</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">userData</span><span class="p">.</span><span class="nx">login</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">userData</span><span class="p">.</span><span class="nx">login</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">password</span> <span class="o">=</span> <span class="nx">userData</span><span class="p">.</span><span class="nx">password</span><span class="p">;</span>
   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="s2">&quot;guest&quot;</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">server_username</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">serverUsername</span><span class="p">;</span>
 
   <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">deferred_login</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredLogin</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/login:/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="nx">username</span><span class="p">);</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">username</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/password:/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="nx">password</span><span class="p">);</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">password</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Press return/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\*{4} Starting FICS session as (.*) \*{4}/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">server_username</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+      <span class="nx">serverUsername</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/fics%/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">issue_command</span><span class="p">(</span><span class="s2">&quot;set seek 0&quot;</span><span class="p">);</span>
-      <span class="nx">deferred_login</span><span class="p">.</span><span class="nx">resolve</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="nx">server_username</span> <span class="p">});</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set seek 0&quot;</span><span class="p">);</span>
+      <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">resolve</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="nx">serverUsername</span> <span class="p">});</span>
     <span class="p">}</span>
   <span class="p">});</span>
 
-  <span class="k">return</span> <span class="nx">deferred_login</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="channel-list">channel_list</h3>
+  <span class="k">return</span> <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="channellist">channelList</h3>
 
 <p>Returns a promise that will resolve with a hash of channel data in the
 format of:</p>
@@ -180,40 +90,42 @@ format of:</p>
 ]
 </code></pre>
 
-<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channel_list</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferred_channels</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channelList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
 
   <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">stop_matching</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">stopMatching</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">send_message</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">);</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">issue_command</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="nx">deferred_channels</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Last Modified/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferred_channels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
+      <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/SPECIAL NOTE/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">stop_matching</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="nx">stopMatching</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\d+(?:,\d+)*\s.*/g</span><span class="p">))</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">stop_matching</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">stopMatching</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span><span class="p">;</span>
       <span class="p">}</span>
 
-      <span class="kd">var</span> <span class="nx">channel_data</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">);</span>
-      <span class="kd">var</span> <span class="nx">channel_numbers</span> <span class="o">=</span> <span class="nx">channel_data</span><span class="p">.</span><span class="nx">shift</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">channelData</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">channelNumbers</span> <span class="o">=</span> <span class="nx">channelData</span><span class="p">.</span><span class="nx">shift</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">);</span>
 
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">channel_numbers</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channel_number</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">channels</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">channel_number</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">channel_data</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="p">});</span>
+      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">channelNumbers</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">channels</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">channelNumber</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">channelData</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">}</span>
   <span class="p">});</span>
 
-  <span class="k">return</span> <span class="nx">deferred_channels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="games">games</h3>
+  <span class="k">return</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="games">games</h3>
 
 <p>Returns a promise that will resolved with an array of data about current
 games on the server in the format:</p>
@@ -232,12 +144,12 @@ LectureBot, so the length of the list is shorter than the length returned
 by the server.</p>
 
 <p><strong>Returns a Promise</strong><br/>(The promise to be resolved with game data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">games</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferred_games</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
 
   <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">issue_command</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="nx">deferred_games</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                  <span class="p">,</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">}</span>
@@ -247,9 +159,124 @@ by the server.</p>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\d+ games displayed./</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferred_games</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
+      <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">});</span>
 
-  <span class="k">return</span> <span class="nx">deferred_games</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="awaitnext">awaitNext</h3>
+
+<p>Creates a promise that monitors the text stream for next page prompts, sends
+a next command, then starts the process all over again before discarding
+the promise</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">awaitNext</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">pagingPromise</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Type \[next\] to see next page\./</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
+
+      <span class="nx">pagingPromise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="lines">lines</h3>
+
+<p>Creates a new promise and then feeds each line of input to the provided
+callback. This allows a command to process the stream line-by-line until it
+determines that the promise can be discarded.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredData</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">bufferedData</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">lineFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">(</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">bufferedData</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">};</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
+
+  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="nx">lineFn</span><span class="p">);</span>
+  <span class="p">},</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">deferredData</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="issuecommand">issueCommand</h3>
+
+<p>Sends a commands to the FICS server. Internally manaages a queue of commands
+that run synchronously to prevent interference with each other, then
+automatically calls the next command if any are remaining.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
+<li><p><strong>promise is optional and must be a Promise.</strong><br/>(An optional promise that will be resolved when the command is complete)</p></li>
+<li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">promise</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+    <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+
+    <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/fics%/</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">deferredLines</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
+
+    <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
+
+    <span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+
+      <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
+  <span class="p">}</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="sendmessage">sendMessage</h3>
+
+<p>sends a message with the approriate encoding and termination character</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sendMessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div></div></body></html>

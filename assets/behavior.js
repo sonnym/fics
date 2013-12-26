@@ -44,32 +44,8 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 3,
-                    "title": "promise",
-                    "slug": "promise"
-                  },
-                  "depth": 3
-                }, {
-                  "type": "heading",
-                  "data": {
-                    "level": 3,
-                    "title": "lines",
-                    "slug": "lines"
-                  },
-                  "depth": 3
-                }, {
-                  "type": "heading",
-                  "data": {
-                    "level": 3,
-                    "title": "issue_command",
-                    "slug": "issue-command"
-                  },
-                  "depth": 3
-                }, {
-                  "type": "heading",
-                  "data": {
-                    "level": 3,
-                    "title": "send_message",
-                    "slug": "send-message"
+                    "title": "getStream",
+                    "slug": "getstream"
                   },
                   "depth": 3
                 }, {
@@ -84,8 +60,8 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 3,
-                    "title": "channel_list",
-                    "slug": "channel-list"
+                    "title": "channelList",
+                    "slug": "channellist"
                   },
                   "depth": 3
                 }, {
@@ -94,6 +70,38 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                     "level": 3,
                     "title": "games",
                     "slug": "games"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "awaitNext",
+                    "slug": "awaitnext"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "lines",
+                    "slug": "lines"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "issueCommand",
+                    "slug": "issuecommand"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "sendMessage",
+                    "slug": "sendmessage"
                   },
                   "depth": 3
                 }
@@ -118,32 +126,8 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 3,
-                "title": "promise",
-                "slug": "promise"
-              },
-              "depth": 3
-            }, {
-              "type": "heading",
-              "data": {
-                "level": 3,
-                "title": "lines",
-                "slug": "lines"
-              },
-              "depth": 3
-            }, {
-              "type": "heading",
-              "data": {
-                "level": 3,
-                "title": "issue_command",
-                "slug": "issue-command"
-              },
-              "depth": 3
-            }, {
-              "type": "heading",
-              "data": {
-                "level": 3,
-                "title": "send_message",
-                "slug": "send-message"
+                "title": "getStream",
+                "slug": "getstream"
               },
               "depth": 3
             }, {
@@ -158,8 +142,8 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 3,
-                "title": "channel_list",
-                "slug": "channel-list"
+                "title": "channelList",
+                "slug": "channellist"
               },
               "depth": 3
             }, {
@@ -168,6 +152,38 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                 "level": 3,
                 "title": "games",
                 "slug": "games"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "awaitNext",
+                "slug": "awaitnext"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "lines",
+                "slug": "lines"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "issueCommand",
+                "slug": "issuecommand"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "sendMessage",
+                "slug": "sendmessage"
               },
               "depth": 3
             }
