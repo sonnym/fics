@@ -28,14 +28,15 @@ var FICSClient = function() {
   this.awaitNext();
 };
 
-// ### getStream
+// ### getSocket
 //
-// Provides access to the raw data received from the FICS server
+// Provides access to the raw data received from the FICS server, but is not to
+// be written to
 //
 // @public
-// @return {function} The emitter function of sthe socket.
-FICSClient.prototype.getStream = function() {
-  return this.socket.on;
+// @return {EventEmitter} The socket itself
+FICSClient.prototype.getSocket = function() {
+  return this.socket;
 };
 
 // ### login

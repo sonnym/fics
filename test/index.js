@@ -90,3 +90,16 @@ exports.test_games = function(test) {
     test.done();
   });
 }
+
+exports.test_getSocket = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("login_screen");
+
+  var fics = new FICSClient();
+  fics.getSocket().on("data", function() {
+    mockSocket.close();
+    test.done();
+  });
+
+  mockSocket.run();
+}
