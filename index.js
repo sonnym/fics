@@ -47,7 +47,6 @@ FICSClient.prototype.__defineGetter__("promise", function() {
   return this.deferred.promise;
 });
 
-
 // ### lines
 //
 // Creates a new promise and then feeds each line of input to the provided
