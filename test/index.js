@@ -19,7 +19,7 @@ exports.test_client_can_be_created = function(test) {
   mockConnection.restore();
 
   test.done();
-}
+};
 
 exports.test_guest_login = function(test) {
   var mockSocket = new MockSocket(test);
@@ -37,7 +37,7 @@ exports.test_guest_login = function(test) {
     mockSocket.close();
     test.done();
   });
-}
+};
 
 exports.test_user_login = function(test) {
   var username = "foo";
@@ -58,7 +58,7 @@ exports.test_user_login = function(test) {
     mockSocket.close();
     test.done();
   });
-}
+};
 
 exports.test_channel_list = function(test) {
   var mockSocket = new MockSocket(test);
@@ -75,7 +75,7 @@ exports.test_channel_list = function(test) {
     mockSocket.close();
     test.done();
   });
-}
+};
 
 exports.test_games = function(test) {
   var mockSocket = new MockSocket(test);
@@ -89,7 +89,7 @@ exports.test_games = function(test) {
     mockSocket.close();
     test.done();
   });
-}
+};
 
 exports.test_getSocket = function(test) {
   var mockSocket = new MockSocket(test);
@@ -102,4 +102,4 @@ exports.test_getSocket = function(test) {
   });
 
   mockSocket.run();
-}
+};
