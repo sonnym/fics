@@ -185,6 +185,7 @@ FICSClient.prototype.login = function(user_data) {
 //  }
 // , ...
 // ]
+// ```
 //
 // @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channel_list = function() {
