@@ -213,7 +213,13 @@ FICSClient.prototype.lines = function(callback) {
   var deferredData = Q.defer();
   var bufferedData = "";
 
-  var lineFn = function(data) {
+  this.socket.on("data", lineFn);
+
+  deferredData.promise.then(removeFn, removeFn, callback);
+
+  return deferredData;
+
+  function lineFn(data) {
     var data = data.toString();
     var lines = (bufferedData + data).split("\n");
 
@@ -224,17 +230,11 @@ FICSClient.prototype.lines = function(callback) {
     _.each(lines, function(line) {
       deferredData.notify(line);
     });
-  };
+  }
 
-  var removeFn = function() {
+  function removeFn() {
     self.socket.removeListener("data", lineFn);
-  };
-
-  this.socket.on("data", lineFn);
-
-  deferredData.promise.then(removeFn, removeFn, callback);
-
-  return deferredData;
+  }
 };
 
 // ### issueCommand
