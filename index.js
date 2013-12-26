@@ -57,10 +57,12 @@ FICSClient.prototype.__defineGetter__("promise", function() {
 // @param {function} callback A callback that will be attached to the promise
 // @return {Promise} The promise with attached callback
 FICSClient.prototype.lines = function(callback) {
+  var self = this;
+
   var deferred_data = Q.defer();
   var buffered_data = "";
 
-  this.socket.on("data", function(data) {
+  var lineFn = function(data) {
     var data = data.toString();
     var lines = (buffered_data + data).split("\n");
 
@@ -71,9 +73,13 @@ FICSClient.prototype.lines = function(callback) {
     _.each(lines, function(line) {
       deferred_data.notify(line);
     });
-  });
+  };
 
-  deferred_data.promise.then(null, null, callback);
+  this.socket.on("data", lineFn);
+
+  deferred_data.promise.then(function() {
+    self.socket.removeListener(lineFn);
+  }, null, callback);
 
   return deferred_data;
 };
