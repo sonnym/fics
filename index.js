@@ -226,11 +226,13 @@ FICSClient.prototype.lines = function(callback) {
     });
   };
 
+  var removeFn = function() {
+    self.socket.removeListener("data", lineFn);
+  };
+
   this.socket.on("data", lineFn);
 
-  deferredData.promise.then(function() {
-    self.socket.removeListener(lineFn);
-  }, null, callback);
+  deferredData.promise.then(removeFn, removeFn, callback);
 
   return deferredData;
 };
