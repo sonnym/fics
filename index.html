@@ -84,23 +84,21 @@ be written to</p>
 <p>Returns a promise that will resolve with a hash of channel data in the
 format of:</p>
 
-<pre><code>[{ number: channelNumber
- , name: channelName
+<pre><code>[{ number: {string} channelNumber
+ , name: {string} channelName
  }
 , ...
 ]
 </code></pre>
 
 <p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channelList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-
   <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
   <span class="kd">var</span> <span class="nx">stopMatching</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">);</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Last Modified/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
     <span class="p">}</span>
@@ -131,10 +129,10 @@ format of:</p>
 <p>Returns a promise that will resolved with an array of data about current
 games on the server in the format:</p>
 
-<pre><code>[{ number: gameNumber
- , white: { name: userName, rating: userRating: time: timerRemaining }
- , black: { name: userName, rating: userRating: time: timerRemaining }
- , move: { color: colorToMove, number: moveNumber }
+<pre><code>[{ number: {string} gameNumber
+ , white: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
+ , black: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
+ , move: { color: {string} colorToMove, number: {string} moveNumber }
  }
 , ...
 ]
@@ -145,12 +143,10 @@ LectureBot, so the length of the list is shorter than the length returned
 by the server.</p>
 
 <p><strong>Returns a Promise</strong><br/>(The promise to be resolved with game data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">games</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-
   <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                  <span class="p">,</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">}</span>
@@ -199,14 +195,12 @@ events, the initial data and updates as the game progresses.</p>
 </ul>
 
 <p><strong>Returns a Promise</strong><br/>(A promise that will notify with game updates)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observe</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferredObservation</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-
   <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
 
   <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;observe &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredObservation</span> <span class="o">=</span>  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;observe &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">rating</span> <span class="o">=</span> <span class="s2">&quot; \\((\\d+|\\+{4})\\) &quot;</span><span class="p">;</span>
     <span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="s2">&quot;(\\w+)&quot;</span><span class="p">;</span>
     <span class="kd">var</span> <span class="nx">newGame</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="s2">&quot;((?:un)?rated) (\\w+) (\\d+) (\\d+)$&quot;</span><span class="p">);</span>
@@ -237,6 +231,45 @@ events, the initial data and updates as the game progresses.</p>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="sought">sought</h3>
+
+<p>Get an objecting representing all the games currently awaiting players.
+The games will be presented in the following format:</p>
+
+<pre><code>[{ number: {string} gameNumber
+ , user: { name: {string} userName, rating: {string} userRating }
+ , time: { initial: {string} clockInitial, increment: {string} clockIncrement }
+ , rated: {boolean} isRated
+ , type: {string} gameType
+ , range: {string} allowedRatingRange
+ }
+, ...
+]
+</code></pre>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with the structure of games.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sought</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredSought</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;sought&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">game</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                 <span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">}</span>
+                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">initial</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nx">increment</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
+                 <span class="p">,</span> <span class="nx">rated</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;rated&quot;</span>
+                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                 <span class="p">,</span> <span class="nx">range</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                 <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+ ads displayed\.$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
+    <span class="p">};</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="awaitnext">awaitNext</h3>
@@ -308,13 +341,13 @@ automatically calls the next command if any are remaining.</p>
 
 <ul>
 <li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
-<li><p><strong>promise is optional and must be a Promise.</strong><br/>(An optional promise that will be resolved when the command is complete)</p></li>
 <li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
-</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">promise</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-    <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+</ul>
 
+<p><strong>Returns a Deferred</strong><br/>(The deferred object that needs to be resolved before the next command will be run.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
         <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
@@ -328,7 +361,7 @@ automatically calls the next command if any are remaining.</p>
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
 
-    <span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
       <span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
 
       <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
@@ -342,6 +375,8 @@ automatically calls the next command if any are remaining.</p>
   <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
   <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="sendmessage">sendMessage</h3>
