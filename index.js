@@ -100,15 +100,13 @@ FICSClient.prototype.login = function(userData) {
 // @public
 // @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channelList = function() {
-  var deferredChannels = Q.defer();
-
   var channels = [];
   var match = null;
   var stopMatching = false;
 
   this.sendMessage("help channel_list");
 
-  this.issueCommand("help channel_list", deferredChannels.promise, function(data) {
+  var deferredChannels = this.issueCommand("help channel_list", function(data) {
     if (data.match(/^Last Modified/)) {
       deferredChannels.resolve(channels);
     }
@@ -156,12 +154,10 @@ FICSClient.prototype.channelList = function() {
 // @public
 // @return {Promise} The promise to be resolved with game data
 FICSClient.prototype.games = function() {
-  var deferredGames = Q.defer();
-
   var games = [];
   var match = null;
 
-  this.issueCommand("games", deferredGames.promise, function(data) {
+  var deferredGames = this.issueCommand("games", function(data) {
     if (match = data.match(/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/)) {
       games.push({ number: match[1]
                  , white: { name: match[3], rating: match[2], time: match[6] }
@@ -207,14 +203,12 @@ FICSClient.prototype.games = function() {
 // @param {number|string} gameNumber Number of game to observe
 // @return {Promise} A promise that will notify with game updates
 FICSClient.prototype.observe = function(gameNumber) {
-  var deferredObservation = Q.defer();
-
   var game = gameNumber.toString();
 
   var result = null;
   var match = null;
 
-  this.issueCommand("observe " + game, deferredObservation.promise, function(data) {
+  var deferredObservation =  this.issueCommand("observe " + game, function(data) {
     var rating = " \\((\\d+|\\+{4})\\) ";
     var user = "(\\w+)";
     var newGame = new RegExp("^Game " + game + ": " + user + rating + user + rating + "((?:un)?rated) (\\w+) (\\d+) (\\d+)$");
@@ -314,14 +308,13 @@ FICSClient.prototype.lines = function(callback) {
 //
 // @private
 // @param {string} command The text of the command
-// @param {Promise} [promise] An optional promise that will be resolved when
-//                            the command is complete
 // @param {function} [callback] An optional callback function to process lines
-FICSClient.prototype.issueCommand = function(command, promise, callback) {
-  if (arguments.length === 1) {
-    var deferred = Q.defer();
-    promise = deferred.promise;
+// @return {Deferred} The deferred object that needs to be resolved before the
+//                    next command will be run.
+FICSClient.prototype.issueCommand = function(command, callback) {
+  var deferred = Q.defer();
 
+  if (arguments.length === 1) {
     callback = function(data) {
       if (data.match(/^fics%$/)) {
         deferred.resolve();
@@ -335,7 +328,7 @@ FICSClient.prototype.issueCommand = function(command, promise, callback) {
 
     self.sendMessage(command);
 
-    promise.then(function() {
+    deferred.promise.then(function() {
       deferredLines.resolve();
 
       self.commandQueue.shift();
@@ -349,6 +342,8 @@ FICSClient.prototype.issueCommand = function(command, promise, callback) {
   if (this.commandQueue.length === 1) {
     this.commandQueue[0]();
   }
+
+  return deferred;
 };
 
 // ### sendMessage
