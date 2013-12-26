@@ -19,6 +19,7 @@ var fics_port = 5000;
 // var FICSClient = require("fics");
 // var fics = new FICSClient();
 // ```
+//
 // @constructor
 var FICSClient = function() {
   this.socket = net.connect({ port: fics_port, host: fics_host });
