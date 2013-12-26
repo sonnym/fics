@@ -1,10 +1,14 @@
-<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="index.js"><meta name="groc-github-url" content="https://github.com/sonnym/fics"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/sonnym/fics/blob/master/index.js">index.js</a></div></div><div id="document"><div class="segment"><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">net</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;net&quot;</span><span class="p">);</span>
+<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="index.js"><meta name="groc-github-url" content="https://github.com/sonnym/fics"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/sonnym/fics/blob/master/index.js">index.js</a></div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="fics">FICS</h1>
+
+<p>A promise-based library for interacting with the Free Internet Chess Server</p></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">net</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;net&quot;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">Q</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;q&quot;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;underscore&quot;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">fics_host</span> <span class="o">=</span> <span class="s2">&quot;freechess.org&quot;</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">fics_port</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="constructor">constructor</h2>
+<span class="kd">var</span> <span class="nx">fics_port</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
+
+<h2 id="ficsclient">FICSClient</h2>
 
 <p>The main object for interacting with the FICS server. Creates a new
 connection and handles all command processing.</p>
@@ -27,13 +31,25 @@ var fics = new FICSClient();
   <span class="p">});</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span> <span class="o">=</span> <span class="p">[];</span>
-<span class="p">};</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="promise">promise</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="s2">&quot;promise&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<p>Provides access to the raw data received from the FICS server</p>
+
+<p><strong>Returns a Promise</strong></p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="s2">&quot;promise&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">});</span>
+<span class="p">});</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="lines">lines</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+<p>Creates a new promise and then feeds each line of input to the provided
+callback. This allows a command to process the stream line-by-line until it
+determines that the promise can be discarded.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">deferred_data</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
   <span class="kd">var</span> <span class="nx">buffered_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
 
@@ -52,9 +68,19 @@ var fics = new FICSClient();
   <span class="nx">deferred_data</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="nx">deferred_data</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="issue-command">issue_command</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issue_command</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">promise</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+<p>Sends a commands to the FICS server. Internally manaages a queue of commands
+that run synchronously to prevent interference with each other, then
+automatically calls the next command if any are remaining.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
+<li><p><strong>promise is optional and must be a Promise.</strong><br/>(An optional promise that will be resolved when the command is complete)</p></li>
+<li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issue_command</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">promise</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
     <span class="nx">promise</span> <span class="o">=</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
@@ -86,13 +112,27 @@ var fics = new FICSClient();
   <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">command_queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
   <span class="p">}</span>
-<span class="p">}</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="send-message">send_message</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">send_message</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+<p>sends a message with the approriate encoding and termination character</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">send_message</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="login">login</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">login</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user_data</span><span class="p">)</span> <span class="p">{</span>
+<p>logs in a user based on the provided data</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>user_data must be an object.</strong><br/>(Hash with login and password keys)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(promise that will resolve with the user login information)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">login</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user_data</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">user_data</span><span class="p">.</span><span class="nx">login</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">user_data</span><span class="p">.</span><span class="nx">login</span><span class="p">;</span>
     <span class="kd">var</span> <span class="nx">password</span> <span class="o">=</span> <span class="nx">user_data</span><span class="p">.</span><span class="nx">password</span><span class="p">;</span>
@@ -128,9 +168,12 @@ var fics = new FICSClient();
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferred_login</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="channel-list">channel_list</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channel_list</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<p>Returns a promise that will resolve with a hash of channel data in the
+format of <code>{ channelNumber: channelName, ... }</code></p>
+
+<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channel_list</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">deferred_channels</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
 
   <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
@@ -163,9 +206,21 @@ var fics = new FICSClient();
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferred_channels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><h3 id="games">games</h3>
 
-<span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">games</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<p>Returns a promise that will resolved with an array of data about current
+games on the server in the format:</p>
+
+<pre><code>[{ number: gameNumber
+ , white: { name: userName, rating: userRating: time: timerRemaining }
+ , black: { name: userName, rating: userRating: time: timerRemaining }
+ , move: { color: colorToMove, number: moveNumber }
+ }
+, ...
+]
+</code></pre>
+
+<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with game data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">games</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">deferred_games</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
 
   <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
@@ -186,6 +241,4 @@ var fics = new FICSClient();
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferred_games</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span>
-
-<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div></div></body></html>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div></div></body></html>
