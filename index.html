@@ -176,10 +176,10 @@ the promise</p></div></div><div class="code"><div class="wrapper"><span class="n
 
   <span class="kd">var</span> <span class="nx">pagingPromise</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Type \[next\] to see next page\./</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
-
       <span class="nx">pagingPromise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+
+      <span class="nx">self</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">});</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
@@ -215,11 +215,13 @@ determines that the promise can be discarded.</p>
     <span class="p">});</span>
   <span class="p">};</span>
 
+  <span class="kd">var</span> <span class="nx">removeFn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
+  <span class="p">};</span>
+
   <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
 
-  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="nx">lineFn</span><span class="p">);</span>
-  <span class="p">},</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">removeFn</span><span class="p">,</span> <span class="nx">removeFn</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="nx">deferredData</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
