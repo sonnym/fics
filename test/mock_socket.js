@@ -74,11 +74,11 @@ MockSocket.prototype.close = function() {
   this.mockConnection.restore();
 
   if (this.fixtures.length > 0) {
-    throw "unused fixtures: " + this.fixtures.join(", ");
+    this.test.ok(false, "unused fixtures: " + this.fixtures.join(", "));
   }
 
   if (this.expectedMessages.length > 0) {
-    throw "expected messages unmet: " + this.expectedMessages.join(", ");
+    this.test.ok(false, "expected messages unmet: " + this.expectedMessages.join(", "));
   }
 };
 
