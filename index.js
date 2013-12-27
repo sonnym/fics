@@ -310,7 +310,7 @@ FICSClient.prototype.sought = function() {
   var deferredSought = this.issueCommand("sought", function(data) {
     if (match = data.match(/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/)) {
       games.push({ game: match[1]
-                 , user: { name: match[2], rating: match[3] }
+                 , user: { name: match[3], rating: match[2] }
                  , time: { initial: match[4], increment: match[5] }
                  , rated: match[6] === "rated"
                  , type: match[7]
