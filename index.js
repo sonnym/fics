@@ -39,6 +39,15 @@ FICSClient.prototype.getSocket = function() {
   return this.socket;
 };
 
+// ### end
+//
+// Removes all listeners from and ends the connection to the FICS server.
+//
+// @public
+FICSClient.prototype.end = function() {
+  this.socket.removeAllListeners().end();
+};
+
 // ### login
 //
 // logs in a user based on the provided data

@@ -21,6 +21,22 @@ exports.testClientCanBeCreated = function(test) {
   test.done();
 };
 
+exports.testClose = function(test) {
+  var mockStream = sinon.mock({ on: function() { }, removeAllListeners: function() { }, end: function() { } });
+  mockStream.expects("removeAllListeners").once().returns(mockStream.object);
+  mockStream.expects("end").once()
+
+  var mockConnection = sinon.mock(net);
+  mockConnection.expects("connect").returns(mockStream.object);
+
+  (new FICSClient()).end();
+
+  mockStream.verify();
+  mockConnection.restore();
+
+  test.done();
+};
+
 exports.testguestLogin = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixtures(["login_screen", "login_guest_intermezzo", "login_guest_success"]);
