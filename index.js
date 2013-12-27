@@ -394,8 +394,7 @@ FICSClient.prototype.lines = function(callback) {
 // @private
 // @param {string} command The text of the command
 // @param {function} [callback] An optional callback function to process lines
-// @return {Deferred} The deferred object that needs to be resolved before the
-//                    next command will be run.
+// @return {Deferred} The deferred object to be resolved
 FICSClient.prototype.issueCommand = function(command, callback) {
   if (arguments.length === 1) {
     callback = function(data) {
