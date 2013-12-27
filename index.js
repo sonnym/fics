@@ -86,6 +86,7 @@ FICSClient.prototype.login = function(userData) {
 
     if (data.match(/^fics%$/)) {
       self.issueCommand("set seek 0");
+      self.issueCommand("set style 12");
       deferredLogin.resolve({ username: serverUsername });
     }
   });

@@ -63,7 +63,7 @@ exports.testUserLogin = function(test) {
 
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixtures(["login_screen", "login_intermezzo", "login_success"]);
-  mockSocket.registerMessages([username, password, "set seek 0"]);
+  mockSocket.registerMessages([username, password, "set seek 0", "set style 12"]);
 
   var fics = new FICSClient();
 
