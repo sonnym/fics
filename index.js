@@ -340,8 +340,8 @@ FICSClient.prototype.awaitNext = function() {
     if (data.match(/^Type \[next\] to see next page\.$/)) {
       pagingPromise.resolve();
 
-      self.awaitNext();
       self.sendMessage("next");
+      self.awaitNext();
     }
   });
 };
