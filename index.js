@@ -353,7 +353,7 @@ FICSClient.prototype.awaitNext = function() {
 //
 // @private
 // @param {function} callback A callback that will be attached to the promise
-// @return {Promise} The promise with attached callback
+// @return {Deferred} The promise with attached callback
 FICSClient.prototype.lines = function(callback) {
   var self = this;
 
