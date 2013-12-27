@@ -119,7 +119,6 @@ FICSClient.prototype.channelList = function() {
       deferredChannels.resolve(channels);
     }
 
-
     if (match = data.match(/^(\d+(?:,\d+)*)\s+(.*)$/)) {
       _.each(match[1].split(","), function(channelNumber) {
         channels.push({ number: channelNumber, name: match[2]});
