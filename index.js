@@ -115,7 +115,7 @@ FICSClient.prototype.channelList = function() {
 
   this.sendMessage("help channel_list");
 
-  var deferredChannels = this.issueCommand("help channel_list", function(data) {
+  var deferredChannels = this.issueBlockingCommand("help channel_list", function(data) {
     if (data.match(/^Last Modified/)) {
       deferredChannels.resolve(channels);
     }
@@ -150,7 +150,7 @@ FICSClient.prototype.who = function() {
   var users = [];
 
   var match = null;
-  var deferredUsers = this.issueCommand("who", function(data) {
+  var deferredUsers = this.issueBlockingCommand("who", function(data) {
     _.each(data.split(/\s{2,}/), function(datum) {
       if (match = datum.match(/^(\d+|[+-]{4})([\^~:#'&. ])(\w+)((?:\([*A-Z]+\))*)$/)) {
         var codes = [];
@@ -199,7 +199,7 @@ FICSClient.prototype.games = function() {
   var games = [];
   var match = null;
 
-  var deferredGames = this.issueCommand("games", function(data) {
+  var deferredGames = this.issueBlockingCommand("games", function(data) {
     if (match = data.match(/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/)) {
       games.push({ number: match[1]
                  , white: { name: match[3], rating: match[2], time: match[6] }
@@ -410,6 +410,42 @@ FICSClient.prototype.issueCommand = function(command, callback) {
   this.sendMessage(command);
 
   deferred.promise.then(deferredLines.resolve, deferredLines.resolve);
+
+  return deferred;
+};
+
+// ### issueBlockingCommand
+//
+// Issues a command, but enqueues it if another blocking command is already
+// running, thus preventing issues with collisions in regular expressions.
+// Other commands will continue to run uninterrupted.
+//
+// @private
+// @param {string} command The text of the command
+// @param {function} A callback function to process lines
+// @return {Deferred} The deferred object that needs to be resolved before the
+//                    next command will be run.
+FICSClient.prototype.issueBlockingCommand = function(command, callback) {
+  var deferred = Q.defer();
+
+  var self = this;
+  this.commandQueue.push(function() {
+    var deferredCommand = self.issueCommand(command, callback);
+
+    deferred.promise.then(function(data) {
+      deferredCommand.resolve();
+
+      self.commandQueue.shift();
+
+      if (self.commandQueue.length > 0) {
+        self.commandQueue[0]();
+      }
+    });
+  });
+
+  if (this.commandQueue.length === 1) {
+    this.commandQueue[0]();
+  }
 
   return deferred;
 };
