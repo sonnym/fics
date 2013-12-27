@@ -104,7 +104,7 @@ format of:</p>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">);</span>
 
-  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Last Modified/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
     <span class="p">}</span>
@@ -136,7 +136,7 @@ format of:</p>
   <span class="kd">var</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[];</span>
 
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">deferredUsers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;who&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredUsers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;who&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s{2,}/</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">datum</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+|[+-]{4})([\^~:#&#39;&amp;. ])(\w+)((?:\([*A-Z]+\))*)$/</span><span class="p">))</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">codes</span> <span class="o">=</span> <span class="p">[];</span>
@@ -182,7 +182,7 @@ by the server.</p>
   <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
-  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                  <span class="p">,</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">}</span>
@@ -380,7 +380,7 @@ when the next FICS input prompt appears.</p>
 <li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
 </ul>
 
-<p><strong>Returns a Deferred</strong><br/>(The deferred object that needs to be resolved before the next command will be run.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+<p><strong>Returns a Deferred</strong><br/>(The deferred object to be resolved)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
@@ -395,6 +395,44 @@ when the next FICS input prompt appears.</p>
   <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
 
   <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="issueblockingcommand">issueBlockingCommand</h3>
+
+<p>Issues a command, but enqueues it if another blocking command is already
+running, thus preventing issues with collisions in regular expressions.
+Other commands will continue to run uninterrupted.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
+<li><p><strong>A must be a function.</strong><br/>(callback function to process lines)</p></li>
+</ul>
+
+<p><strong>Returns a Deferred</strong><br/>(The deferred object that needs to be resolved before the next command will be run.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueBlockingCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">deferredCommand</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+
+    <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">deferredCommand</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+
+      <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
+  <span class="p">}</span>
 
   <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
