@@ -3,6 +3,8 @@ var path = require("path");
 
 var sinon = require("sinon");
 
+var Q = require("q");
+
 var FICSClient = require(path.join(__filename, "..", ".."));
 
 var MockSocket = require("./mock_socket");
@@ -162,6 +164,23 @@ exports.testObserve = function(test) {
     test.deepEqual(notifications.shift(), data);
   });
 };
+
+exports.testObservingMultipleGames = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerMessages(["observe 47", "observe 8"]);
+
+  var fics = new FICSClient();
+
+  Q.all([fics.observe("47"), fics.observe("8")]).then(function(results) {
+    test.equal(2, results.length);
+
+    mockSocket.close();
+    test.done();
+  });
+
+  mockSocket.registerFixture("observation");
+  mockSocket.run();
+}
 
 exports.testSought = function(test) {
   var mockSocket = new MockSocket(test);

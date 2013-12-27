@@ -386,9 +386,9 @@ FICSClient.prototype.lines = function(callback) {
 
 // ### issueCommand
 //
-// Sends a commands to the FICS server. Internally manaages a queue of commands
-// that run synchronously to prevent interference with each other, then
-// automatically calls the next command if any are remaining.
+// Sends a commands to the FICS server and receive output line by line. If no
+// callback is provided, the command will execute and be considered complete
+// when the next FICS input prompt appears.
 //
 // @private
 // @param {string} command The text of the command
@@ -396,8 +396,6 @@ FICSClient.prototype.lines = function(callback) {
 // @return {Deferred} The deferred object that needs to be resolved before the
 //                    next command will be run.
 FICSClient.prototype.issueCommand = function(command, callback) {
-  var deferred = Q.defer();
-
   if (arguments.length === 1) {
     callback = function(data) {
       if (data.match(/^fics%$/)) {
@@ -406,26 +404,12 @@ FICSClient.prototype.issueCommand = function(command, callback) {
     }
   }
 
-  var self = this;
-  this.commandQueue.push(function() {
-    var deferredLines = self.lines(callback);
+  var deferred = Q.defer();
+  var deferredLines = this.lines(callback);
 
-    self.sendMessage(command);
+  this.sendMessage(command);
 
-    deferred.promise.then(function() {
-      deferredLines.resolve();
-
-      self.commandQueue.shift();
-
-      if (self.commandQueue.length > 0) {
-        self.commandQueue[0]();
-      }
-    });
-  });
-
-  if (this.commandQueue.length === 1) {
-    this.commandQueue[0]();
-  }
+  deferred.promise.then(deferredLines.resolve, deferredLines.resolve);
 
   return deferred;
 };
