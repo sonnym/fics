@@ -113,8 +113,6 @@ FICSClient.prototype.channelList = function() {
   var channels = [];
   var match = null;
 
-  this.sendMessage("help channel_list");
-
   var deferredChannels = this.issueBlockingCommand("help channel_list", function(data) {
     if (data.match(/^Last Modified/)) {
       deferredChannels.resolve(channels);
