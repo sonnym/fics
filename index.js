@@ -128,6 +128,30 @@ FICSClient.prototype.channelList = function() {
   return deferredChannels.promise;
 };
 
+// ### channels
+//
+// Retrieve a list of channels to which the logged in user is currently
+// subscribed, returned as an array of strings representing the channel numbers
+//
+// ```
+// [ {string} channelNumber, ... ]
+// ```
+//
+// @public
+// @return {Promise} A promise to be resolved
+FICSClient.prototype.channels = function() {
+  var channels = [];
+  var match = null;
+
+  var deferredChannels = this.issueCommand("=channel", function(data) {
+    if (match = data.match(/^((\d+)(\s+)?)+$/)) {
+      deferredChannels.resolve(match[0].split(/\s+/));
+    }
+  });
+
+  return deferredChannels.promise;
+};
+
 // ### who
 //
 // Returns a promise that will be resolved with users in the following format.

@@ -95,6 +95,21 @@ exports.testChannelList = function(test) {
   });
 };
 
+exports.testChannels = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerMessage("=channel");
+  mockSocket.registerFixture("channel");
+
+  var fics = new FICSClient();
+
+  fics.channels().then(function(channels) {
+    test.equal(14, channels.length);
+
+    mockSocket.close();
+    test.done();
+  });
+}
+
 exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("who");
