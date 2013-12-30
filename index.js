@@ -178,6 +178,32 @@ FICSClient.prototype.joinChannel = function(channelNumber) {
   return deferredJoinChannel.promise;
 };
 
+// ### leaveChannel
+//
+// Removes the channel from the user's channel list.
+//
+// @public
+// @param {number|string} The channel to leave.
+// @return {Promise} A promise that will be resolved with `true` if the channel
+//                   was successfully removed or `false` if it was not in the
+//                   user's channel list
+FICSClient.prototype.leaveChannel = function(channelNumber) {
+  var channel = channelNumber.toString();
+  var match = null;
+
+  var deferredLeaveChannel = this.issueCommand("-channel " + channel, function(data) {
+    if (match = data.match(new RegExp("^\\[" + channel + "\\] removed from your channel list\\.$"))) {
+      deferredLeaveChannel.resolve(true);
+    }
+
+    if (match = data.match(new RegExp("^\\[" + channel + "\\] is not in your channel list\\.$"))) {
+      deferredLeaveChannel.resolve(false);
+    }
+  });
+
+  return deferredLeaveChannel.promise;
+};
+
 // ### who
 //
 // Returns a promise that will be resolved with users in the following format.

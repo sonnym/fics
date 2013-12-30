@@ -140,6 +140,36 @@ exports.testJoinChannelFailure = function(test) {
   });
 };
 
+exports.testLeaveChannelSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("channel_leave_success");
+  mockSocket.registerMessage("-channel 31");
+
+  var fics = new FICSClient();
+
+  fics.leaveChannel("31").then(function(success) {
+    test.ok(success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
+exports.testLeaveChannelFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("channel_leave_failure");
+  mockSocket.registerMessage("-channel 31");
+
+  var fics = new FICSClient();
+
+  fics.leaveChannel("31").then(function(success) {
+    test.ok(!success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
 exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("who");
