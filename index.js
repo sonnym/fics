@@ -483,6 +483,29 @@ FICSClient.prototype.lines = function(callback) {
     var data = data.toString();
     var lines = (bufferedData + data).split("\n");
 
+    lines = _.reduce(lines, function(memo, line, i) {
+      if (line.trim().substr(0, 1) === "\\") {
+        return memo;
+      };
+
+      var continueAppend = true;
+      var combined = _.reduce(_.rest(lines, i + 1), function(memo, line) {
+        var trimmedLine = line.trim();
+
+        if (continueAppend && trimmedLine.substr(0, 1) === "\\") {
+          memo.push(trimmedLine.substr(1).trim());
+        } else {
+          continueAppend = false;
+        }
+
+        return memo;
+      }, [line.trim()]);
+
+      memo.push(combined.join(" "));
+
+      return memo;
+    }, []);
+
     if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
       bufferedData = lines.pop();
     }
