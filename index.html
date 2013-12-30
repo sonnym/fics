@@ -138,6 +138,60 @@ subscribed, returned as an array of strings representing the channel numbers</p>
   <span class="k">return</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
+<h3 id="joinchannel">joinChannel</h3>
+
+<p>Adds the channel to the user's channel list.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>The can be a number or a string.</strong><br/>(channel to join.)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully added or <code>false</code> if it was already in the user's channel list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">joinChannel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">channelNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredJoinChannel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;+channel &quot;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] added to your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] is already on your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="leavechannel">leaveChannel</h3>
+
+<p>Removes the channel from the user's channel list.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>The can be a number or a string.</strong><br/>(channel to leave.)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully removed or <code>false</code> if it was not in the user's channel list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">leaveChannel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">channelNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredLeaveChannel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;-channel &quot;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] removed from your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] is not in your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
 <h3 id="who">who</h3>
 
 <p>Returns a promise that will be resolved with users in the following format.</p>
@@ -288,6 +342,96 @@ events, the initial data and updates as the game progresses.</p>
   <span class="k">return</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
+<h3 id="moves">moves</h3>
+
+<p>Returns a promise to be resolved with the moves for a given game. The
+structure of the moves is an array of tuple arrays, e.g.</p>
+
+<pre><code>[ [{string} whiteMove, {string} blackMove]
+, ...
+, [{string} whitheMove]
+]
+</code></pre>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will return with the moves of the game)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">moves</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">moves</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredMoves</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;moves &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+\.\s+([RNBQKPa-h1-8Ox-]+)\s+\(\d+:\d+\)(?:\s+([RNBQKPa-h1-8Ox-]+)?\s+\(\d+:\d+\))?$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">{</span>
+        <span class="nx">moves</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]]);</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">moves</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]]);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^{Still in progress} \*$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredMoves</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">moves</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredMoves</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="observers">observers</h3>
+
+<p>Get a list of all the observers currently watching a game.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will return with the current observers)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observers</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">deferredObservers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;allobservers &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Observing &quot;</span> <span class="o">+</span> <span class="nx">gameNumber</span> <span class="o">+</span> <span class="s2">&quot; \\[.*\\]:\\s+((.*\\s)+)\\(\\d+ users\\)$&quot;</span><span class="p">));</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">deferredObservers</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">trim</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredObservers</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="unobserve">unobserve</h3>
+
+<p>Stop observing a game.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with <code>true</code> if the game was removed from the observation list or <code>false</code> if it was not in the observation list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">unobserve</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">deferredUnobserve</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;unobserve &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Removing game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; from observation list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^You are not observing any games\.$/</span><span class="p">)</span> <span class="o">||</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^You are not observing game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;\\.&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
 <h3 id="sought">sought</h3>
 
 <p>Get an objecting representing all the games currently awaiting players.
@@ -371,6 +515,29 @@ determines that the promise can be discarded.</p>
   <span class="kd">function</span> <span class="nx">lineFn</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">(</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">);</span>
+
+    <span class="nx">lines</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">().</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="kd">var</span> <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="kd">var</span> <span class="nx">combined</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">rest</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">trimmedLine</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">continueAppend</span> <span class="o">&amp;&amp;</span> <span class="nx">trimmedLine</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">trimmedLine</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">trim</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
+      <span class="p">},</span> <span class="p">[</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">()]);</span>
+
+      <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">combined</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">));</span>
+
+      <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
+    <span class="p">},</span> <span class="p">[]);</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">bufferedData</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>

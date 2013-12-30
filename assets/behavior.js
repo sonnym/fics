@@ -84,6 +84,22 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 3,
+                    "title": "joinChannel",
+                    "slug": "joinchannel"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "leaveChannel",
+                    "slug": "leavechannel"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
                     "title": "who",
                     "slug": "who"
                   },
@@ -123,6 +139,30 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                       "depth": 4
                     }
                   ]
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "moves",
+                    "slug": "moves"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "observers",
+                    "slug": "observers"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "unobserve",
+                    "slug": "unobserve"
+                  },
+                  "depth": 3
                 }, {
                   "type": "heading",
                   "data": {
@@ -241,6 +281,22 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
               "type": "heading",
               "data": {
                 "level": 3,
+                "title": "joinChannel",
+                "slug": "joinchannel"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "leaveChannel",
+                "slug": "leavechannel"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
                 "title": "who",
                 "slug": "who"
               },
@@ -280,6 +336,30 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "depth": 4
                 }
               ]
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "moves",
+                "slug": "moves"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "observers",
+                "slug": "observers"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "unobserve",
+                "slug": "unobserve"
+              },
+              "depth": 3
             }, {
               "type": "heading",
               "data": {
