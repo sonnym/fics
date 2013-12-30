@@ -289,6 +289,36 @@ exports.testObservers = function(test) {
   });
 };
 
+exports.testUnobserveSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("unobserve_success");
+  mockSocket.registerMessage("unobserve 433");
+
+  var fics = new FICSClient();
+
+  fics.unobserve("433").then(function(success) {
+    test.ok(success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
+exports.testUnobserveFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("unobserve_failure");
+  mockSocket.registerMessage("unobserve 433");
+
+  var fics = new FICSClient();
+
+  fics.unobserve("433").then(function(success) {
+    test.ok(!success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
 exports.testSought = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("sought");

@@ -416,6 +416,31 @@ FICSClient.prototype.observers = function(gameNumber) {
   return deferredObservers.promise;
 };
 
+// ### unobserve
+//
+// Stop observing a game.
+//
+// @public
+// @param {number|string} gameNumber Number of the game
+// @return {Promise} A promise that will resolve with `true` if the game was
+//                   removed from the observation list or `false` if it was not
+//                   in the observation list
+FICSClient.prototype.unobserve = function(gameNumber) {
+  var game = gameNumber.toString();
+
+  var deferredUnobserve = this.issueCommand("unobserve " + game, function(data) {
+    if (data.match(new RegExp("^Removing game " + game + " from observation list\\.$"))) {
+      deferredUnobserve.resolve(true);
+    }
+
+    if (data.match(/^You are not observing any games\.$/) || data.match(new RegExp("^You are not observing game " + game + "\\."))) {
+      deferredUnobserve.resolve(false);
+    }
+  });
+
+  return deferredUnobserve.promise;
+};
+
 // ### sought
 //
 // Get an objecting representing all the games currently awaiting players.
