@@ -108,7 +108,37 @@ exports.testChannels = function(test) {
     mockSocket.close();
     test.done();
   });
-}
+};
+
+exports.testJoinChannelSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("channel_add_success");
+  mockSocket.registerMessage("+channel 31");
+
+  var fics = new FICSClient();
+
+  fics.joinChannel("31").then(function(success) {
+    test.ok(success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
+
+exports.testJoinChannelFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("channel_add_failure");
+  mockSocket.registerMessage("+channel 31");
+
+  var fics = new FICSClient();
+
+  fics.joinChannel("31").then(function(success) {
+    test.ok(!success);
+
+    mockSocket.close();
+    test.done();
+  });
+};
 
 exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);

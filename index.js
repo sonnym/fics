@@ -152,6 +152,32 @@ FICSClient.prototype.channels = function() {
   return deferredChannels.promise;
 };
 
+// ### joinChannel
+//
+// Adds the channel to the user's channel list.
+//
+// @public
+// @param {number|string} The channel to join.
+// @return {Promise} A promise that will be resolved with `true` if the channel
+//                   was successfully added or `false` if it was already in the
+//                   user's channel list
+FICSClient.prototype.joinChannel = function(channelNumber) {
+  var channel = channelNumber.toString();
+  var match = null;
+
+  var deferredJoinChannel = this.issueCommand("+channel " + channel, function(data) {
+    if (match = data.match(new RegExp("^\\[" + channel + "\\] added to your channel list\\.$"))) {
+      deferredJoinChannel.resolve(true);
+    }
+
+    if (match = data.match(new RegExp("^\\[" + channel + "\\] is already on your channel list\\.$"))) {
+      deferredJoinChannel.resolve(false);
+    }
+  });
+
+  return deferredJoinChannel.promise;
+};
+
 // ### who
 //
 // Returns a promise that will be resolved with users in the following format.
