@@ -291,8 +291,15 @@ events, the initial data and updates as the game progresses.</p>
 <h4 id="updates">updates</h4>
 
 <pre><code>{ position: {string} fenPosition
-, color: {string} lastMoveColor
-, time: {string} lastMoveTimeRemaining }
+, current: { color: {string} currentMoveColor
+           , move: {string} currentMoveNumber
+           }
+, time: { white: {string} whiteTimeInSeconds
+        , black: {string} blackTimeInSeconds
+        }
+, move: { verbose: {string} verboseLastMove
+        , algebraic: {string} algebraicLastMove
+        } }
 </code></pre>
 
 <p>The promise will resolve with the result of the game as a string, e.g. <code>1-0</code>.</p>
@@ -324,10 +331,14 @@ events, the initial data and updates as the game progresses.</p>
     <span class="p">}</span>
 
     <span class="kd">var</span> <span class="nx">gameUpdate</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&lt;\\d+&gt; ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}&quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\w+ \\w+ &quot;</span> <span class="o">+</span>
-                                <span class="s2">&quot;(?:\\d+ ){8}(?:.+) \\((\\d+:\\d+)\\)(?:.*)$&quot;</span><span class="p">);</span>
+                                <span class="s2">&quot;(?:\\d+ ){5}(\\d+) (\\d+) (\\d+) ([RNBQKP]\/[a-h][1-8]-[a-h][1-8]) \\(\\d+:\\d+\\) (.+)(?:\\s+\\d+){3}$&quot;</span><span class="p">);</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">gameUpdate</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">position</span><span class="o">:</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">});</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">position</span><span class="o">:</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                 <span class="p">,</span> <span class="nx">current</span><span class="o">:</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">move</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">white</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">black</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">,</span> <span class="nx">move</span><span class="o">:</span> <span class="p">{</span> <span class="nx">verbose</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="nx">algebraic</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">});</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^{Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
