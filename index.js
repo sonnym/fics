@@ -305,6 +305,44 @@ FICSClient.prototype.observe = function(gameNumber) {
   return deferredObservation.promise;
 };
 
+// ### moves
+//
+// Returns a promise to be resolved with the moves for a given game. The
+// structure of the moves is an array of tuple arrays, e.g.
+//
+// ```
+// [ [{string} whiteMove, {string} blackMove]
+// , ...
+// , [{string} whitheMove]
+// ]
+// ```
+//
+// @public
+// @param {number|string} gameNumber Number of the game
+// @return {Promise} A promise that will return with the moves of the game
+FICSClient.prototype.moves = function(gameNumber) {
+  var game = gameNumber.toString();
+
+  var moves = [];
+  var match = null;
+
+  var deferredMoves = this.issueCommand("moves " + game, function(data) {
+    if (match = data.match(/^\d+\.\s+([RNBQKPa-h1-8Ox-]+)\s+\(\d+:\d+\)(?:\s+([RNBQKPa-h1-8Ox-]+)?\s+\(\d+:\d+\))?$/)) {
+      if (match[2]) {
+        moves.push([match[1], match[2]]);
+      } else {
+        moves.push([match[1]]);
+      }
+    }
+
+    if (match = data.match(/^{Still in progress} \*$/)) {
+      deferredMoves.resolve(moves);
+    }
+  });
+
+  return deferredMoves.promise;
+};
+
 // ### sought
 //
 // Get an objecting representing all the games currently awaiting players.

@@ -195,7 +195,24 @@ exports.testObservingMultipleGames = function(test) {
 
   mockSocket.registerFixture("observation");
   mockSocket.run();
-}
+};
+
+exports.testMoves = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("moves");
+  mockSocket.registerMessage("moves 93");
+
+  var fics = new FICSClient();
+
+  fics.moves("93").then(function(moves) {
+    test.equal(16, moves.length);
+    test.equal(2, moves[14].length);
+    test.equal(1, moves[15].length);
+
+    mockSocket.close();
+    test.done();
+  });
+};
 
 exports.testSought = function(test) {
   var mockSocket = new MockSocket(test);
