@@ -274,6 +274,21 @@ exports.testMoves = function(test) {
   });
 };
 
+exports.testObservers = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("observers");
+  mockSocket.registerMessage("allobservers");
+
+  var fics = new FICSClient();
+
+  fics.observers("93").then(function(observers) {
+    test.equal(6, observers.length);
+
+    test.done();
+    mockSocket.close();
+  });
+};
+
 exports.testSought = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("sought");

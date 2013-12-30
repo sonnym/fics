@@ -395,6 +395,27 @@ FICSClient.prototype.moves = function(gameNumber) {
   return deferredMoves.promise;
 };
 
+// ### observers
+//
+// Get a list of all the observers currently watching a game.
+//
+// @public
+// @param {number|string} gameNumber Number of the game
+// @return {Promise} A promise that will return with the current observers
+FICSClient.prototype.observers = function(gameNumber) {
+  var game = gameNumber.toString();
+
+  var deferredObservers = this.issueCommand("allobservers " + game, function(data) {
+    var match = data.match(new RegExp("^Observing " + gameNumber + " \\[.*\\]:\\s+((.*\\s)+)\\(\\d+ users\\)$"));
+
+    if (match) {
+      deferredObservers.resolve(match[1].trim().split(/\s+/));
+    }
+  });
+
+  return deferredObservers.promise;
+};
+
 // ### sought
 //
 // Get an objecting representing all the games currently awaiting players.
