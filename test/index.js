@@ -214,19 +214,58 @@ exports.testObserve = function(test) {
       , type: "blitz"
       , time: { initial: "5", increment: "0" }
       }
-    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/1R5K", color: "W", time: "0:00" }
-    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/3R3K", color: "B", time: "0:08" }
-    , { position: "8/1p1Q1pkp/p2p2p1/5r2/P1p2P2/1q5P/6P1/3R3K", color: "W", time: "0:00" }
-    , { position: "8/1p1Q1pkp/p2R2p1/5r2/P1p2P2/1q5P/6P1/7K", color: "B", time: "0:03" }
-    , { position: "8/1p1Q1pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K", color: "W", time: "0:00" }
-    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K", color: "B", time: "0:17" }
-    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6P1/1q5K", color: "W", time: "0:00" }
-    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6PK/1q6", color: "B", time: "0:02" }
-    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8", color: "W", time: "0:00" }
-    , { position: "2Q5/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8", color: "B", time: "0:15" }
-    , { position: "2Q5/1p3pkp/p2R2p1/4q3/P1p2r2/7P/6PK/8", color: "W", time: "0:00" }
-    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p2r2/7P/3R2PK/8", color: "B", time: "0:15" }
-    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8", color: "W", time: "0:00" }
+    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/1R5K"
+      , current: { color: "W", move: "35" }
+      , time: { white: "158", black: "296" }
+      , move: { verbose: "R/e5-f5", algebraic: "Rf5" } }
+    , { position: "8/1p1Q1pkp/pq1p2p1/5r2/P1p2P2/1P5P/6P1/3R3K"
+      , current: { color: "B", move: "35" }
+      , time: { white: "153", black: "296" }
+      , move: { verbose: "R/b1-d1", algebraic: "Rd1" } }
+    , { position: "8/1p1Q1pkp/p2p2p1/5r2/P1p2P2/1q5P/6P1/3R3K"
+      , current: { color: "W", move: "36" }
+      , time: { white: "153", black: "296" }
+      , move: { verbose: "Q/b6-b3", algebraic: "Qxb3" } }
+    , { position: "8/1p1Q1pkp/p2R2p1/5r2/P1p2P2/1q5P/6P1/7K"
+      , current: { color: "B", move: "36" }
+      , time: { white: "151", black: "296" }
+      , move: { verbose: "R/d1-d6", algebraic: "Rxd6" } }
+    , { position: "8/1p1Q1pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K"
+      , current: { color: "W", move: "37" }
+      , time: { white: "151", black: "296" }
+      , move: { verbose: "R/f5-f4", algebraic: "Rxf4" } }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K"
+      , current: { color: "B", move: "37" }
+      , time: { white: "133", black: "296" }
+      , move: { verbose: "Q/d7-e8", algebraic: "Qe8" } }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6P1/1q5K"
+      , current: { color: "W", move: "38" }
+      , time: { white: "133", black: "296" }
+      , move: { verbose: "Q/b3-b1", algebraic: "Qb1+" } }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6PK/1q6"
+      , current: { color: "B", move: "38" }
+      , time: { white: "132", black: "296" }
+      , move: { verbose: "K/h1-h2", algebraic: "Kh2" } }
+    , { position: "4Q3/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8"
+      , current: { color: "W", move: "39" }
+      , time: { white: "132", black: "295" }
+      , move: { verbose: "Q/b1-e4", algebraic: "Qe4" } }
+    , { position: "2Q5/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8"
+      , current: { color: "B", move: "39" }
+      , time: { white: "117", black: "295" }
+      , move: { verbose: "Q/e8-c8", algebraic: "Qc8" } }
+    , { position: "2Q5/1p3pkp/p2R2p1/4q3/P1p2r2/7P/6PK/8"
+      , current: { color: "W", move: "40" }
+      , time: { white: "117", black: "295" }
+      , move: { verbose: "Q/e4-e5", algebraic: "Qe5" } }
+    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p2r2/7P/3R2PK/8"
+      , current: { color: "B", move: "40" }
+      , time: { white: "102", black: "295" }
+      , move: { verbose: "R/d6-d2", algebraic: "Rd2" } }
+    , { position: "2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8"
+      , current: { color: "W", move: "41" }
+      , time: { white: "102", black: "295" }
+      , move: { verbose: "R/f4-f3", algebraic: "Rf3+" } }
     ];
 
   var observationPromise = fics.observe(47);

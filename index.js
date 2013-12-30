@@ -309,8 +309,15 @@ FICSClient.prototype.games = function() {
 // #### updates
 // ```
 // { position: {string} fenPosition
-// , color: {string} lastMoveColor
-// , time: {string} lastMoveTimeRemaining }
+// , current: { color: {string} currentMoveColor
+//            , move: {string} currentMoveNumber
+//            }
+// , time: { white: {string} whiteTimeInSeconds
+//         , black: {string} blackTimeInSeconds
+//         }
+// , move: { verbose: {string} verboseLastMove
+//         , algebraic: {string} algebraicLastMove
+//         } }
 // ```
 //
 // The promise will resolve with the result of the game as a string, e.g. `1-0`.
@@ -339,10 +346,14 @@ FICSClient.prototype.observe = function(gameNumber) {
     }
 
     var gameUpdate = new RegExp("^<\\d+> ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}" + game + " \\w+ \\w+ " +
-                                "(?:\\d+ ){8}(?:.+) \\((\\d+:\\d+)\\)(?:.*)$");
+                                "(?:\\d+ ){5}(\\d+) (\\d+) (\\d+) ([RNBQKP]\/[a-h][1-8]-[a-h][1-8]) \\(\\d+:\\d+\\) (.+)(?:\\s+\\d+){3}$");
 
     if (match = data.match(gameUpdate)) {
-      deferredObservation.notify({ position: ranks2fen(match[1]), color: match[2], time: match[3] });
+      deferredObservation.notify({ position: ranks2fen(match[1])
+                                 , current: { color: match[2], move: match[5] }
+                                 , time: { white: match[3], black: match[4] }
+                                 , move: { verbose: match[6], algebraic: match[7] }
+                                 });
     }
 
     if (match = data.match(new RegExp("^{Game " + game + " \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$"))) {
