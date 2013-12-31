@@ -226,6 +226,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "36" }
       , time: { white: "153", black: "296" }
       , move: { verbose: "Q/b6-b3", algebraic: "Qxb3" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-3.74; nps=14K; time=0.12; egtb=0"
+      , type: "whisper" }
     , { position: "8/1p1Q1pkp/p2R2p1/5r2/P1p2P2/1q5P/6P1/7K"
       , current: { color: "B", move: "36" }
       , time: { white: "151", black: "296" }
@@ -234,6 +237,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "37" }
       , time: { white: "151", black: "296" }
       , move: { verbose: "R/f5-f4", algebraic: "Rxf4" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-4.19; nps=15K; time=0.14; egtb=0"
+      , type: "whisper" }
     , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/1q5P/6P1/7K"
       , current: { color: "B", move: "37" }
       , time: { white: "133", black: "296" }
@@ -242,6 +248,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "38" }
       , time: { white: "133", black: "296" }
       , move: { verbose: "Q/b3-b1", algebraic: "Qb1+" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-4.22; nps=43K; time=0.07; egtb=0"
+      , type: "whisper" }
     , { position: "4Q3/1p3pkp/p2R2p1/8/P1p2r2/7P/6PK/1q6"
       , current: { color: "B", move: "38" }
       , time: { white: "132", black: "296" }
@@ -250,6 +259,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "39" }
       , time: { white: "132", black: "295" }
       , move: { verbose: "Q/b1-e4", algebraic: "Qe4" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-4.33; nps=26K; time=0.06; egtb=0"
+      , type: "whisper" }
     , { position: "2Q5/1p3pkp/p2R2p1/8/P1p1qr2/7P/6PK/8"
       , current: { color: "B", move: "39" }
       , time: { white: "117", black: "295" }
@@ -258,6 +270,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "40" }
       , time: { white: "117", black: "295" }
       , move: { verbose: "Q/e4-e5", algebraic: "Qe5" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-10.05; nps=33K; time=0.15; egtb=0"
+      , type: "whisper" }
     , { position: "2Q5/1p3pkp/p5p1/4q3/P1p2r2/7P/3R2PK/8"
       , current: { color: "B", move: "40" }
       , time: { white: "102", black: "295" }
@@ -266,6 +281,9 @@ exports.testObserve = function(test) {
       , current: { color: "W", move: "41" }
       , time: { white: "102", black: "295" }
       , move: { verbose: "R/f4-f3", algebraic: "Rf3+" } }
+    , { user: "GriffySr(C)(2094)"
+      , message: "ply=4; eval=-11.31; nps=53K; time=0.08; egtb=0"
+      , type: "whisper" }
     ];
 
   var observationPromise = fics.observe(47);

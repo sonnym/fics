@@ -292,8 +292,9 @@ FICSClient.prototype.games = function() {
 
 // ### observe
 //
-// Observe a game currently in progress. The promise is notified of two
-// events, the initial data and updates as the game progresses.
+// Observe a game currently in progress. The promise is notified of three
+// events: the initial data for the game, updates as the game progresses, and
+// any messages that are sent during the game.
 //
 // #### initial data
 // ```
@@ -306,7 +307,7 @@ FICSClient.prototype.games = function() {
 //         } }
 // ```
 //
-// #### updates
+// #### game updates
 // ```
 // { position: {string} fenPosition
 // , current: { color: {string} currentMoveColor
@@ -318,6 +319,13 @@ FICSClient.prototype.games = function() {
 // , move: { verbose: {string} verboseLastMove
 //         , algebraic: {string} algebraicLastMove
 //         } }
+// ```
+//
+// #### messages
+// ```
+// { user: {string} userName
+// , message: {string} messageText
+// , type: {string} kibitzOrWhisper }
 // ```
 //
 // The promise will resolve with the result of the game as a string, e.g. `1-0`.
@@ -353,6 +361,13 @@ FICSClient.prototype.observe = function(gameNumber) {
                                  , current: { color: match[2], move: match[5] }
                                  , time: { white: match[3], black: match[4] }
                                  , move: { verbose: match[6], algebraic: match[7] }
+                                 });
+    }
+
+    if (match = data.match(new RegExp("^(.*)\\[" + game + "\\] (kibitzes|whispers): (.*)$"))) {
+      deferredObservation.notify({ user: match[1]
+                                 , message: match[3]
+                                 , type: (match[2] === "kibitzes") ? "kibitz" : "whisper"
                                  });
     }
 
