@@ -442,6 +442,46 @@ FICSClient.prototype.observers = function(gameNumber) {
   return deferredObservers.promise;
 };
 
+// ### kibitz
+//
+// Send a message to all observers and players of a game.
+//
+// @public
+// @param {string|number} gameNumber Number of the game
+// @param {string} message The message to be broadcast
+// @return {Promise} Resolved after message is sent.
+FICSClient.prototype.kibitz = function(gameNumber, message) {
+  var game = gameNumber.toString();
+
+  var deferredKibitz = this.issueCommand(["xkibitz", game, message].join(" "), function(data) {
+    if (data.match(/^\(kibitzed to \d+ players?\)$/)) {
+      deferredKibitz.resolve(true);
+    }
+  });
+
+  return deferredKibitz.promise;
+};
+
+// ### whisper
+//
+// Send a message to all observers of a game.
+//
+// @public
+// @param {string|number} gameNumber Number of the game
+// @param {string} message The message to be broadcast
+// @return {Promise} Resolved after message is sent.
+FICSClient.prototype.whisper = function(gameNumber, message) {
+  var game = gameNumber.toString();
+
+  var deferredWhisper = this.issueCommand(["xwhisper", game, message].join(" "), function(data) {
+    if (data.match(/^\(whispered to \d+ players?\)$/)) {
+      deferredWhisper.resolve(true);
+    }
+  });
+
+  return deferredWhisper.promise;
+};
+
 // ### unobserve
 //
 // Stop observing a game.

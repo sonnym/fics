@@ -346,6 +346,36 @@ exports.testObservers = function(test) {
   });
 };
 
+exports.testKibitz = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("kibitz");
+  mockSocket.registerMessage("xkibitz 85 test");
+
+  var fics = new FICSClient();
+
+  fics.kibitz("85", "test").then(function(success) {
+    test.ok(success);
+
+    test.done();
+    mockSocket.close();
+  });
+};
+
+exports.testWhisper = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("whisper");
+  mockSocket.registerMessage("xwhisper 85 test");
+
+  var fics = new FICSClient();
+
+  fics.whisper("85", "test").then(function(success) {
+    test.ok(success);
+
+    test.done();
+    mockSocket.close();
+  });
+};
+
 exports.testUnobserveSuccess = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("unobserve_success");
