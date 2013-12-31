@@ -274,8 +274,9 @@ by the server.</p>
 
 <h3 id="observe">observe</h3>
 
-<p>Observe a game currently in progress. The promise is notified of two
-events, the initial data and updates as the game progresses.</p>
+<p>Observe a game currently in progress. The promise is notified of three
+events: the initial data for the game, updates as the game progresses, and
+any messages that are sent during the game.</p>
 
 <h4 id="initial-data">initial data</h4>
 
@@ -288,7 +289,7 @@ events, the initial data and updates as the game progresses.</p>
         } }
 </code></pre>
 
-<h4 id="updates">updates</h4>
+<h4 id="game-updates">game updates</h4>
 
 <pre><code>{ position: {string} fenPosition
 , current: { color: {string} currentMoveColor
@@ -300,6 +301,13 @@ events, the initial data and updates as the game progresses.</p>
 , move: { verbose: {string} verboseLastMove
         , algebraic: {string} algebraicLastMove
         } }
+</code></pre>
+
+<h4 id="messages">messages</h4>
+
+<pre><code>{ user: {string} userName
+, message: {string} messageText
+, type: {string} kibitzOrWhisper }
 </code></pre>
 
 <p>The promise will resolve with the result of the game as a string, e.g. <code>1-0</code>.</p>
@@ -338,6 +346,13 @@ events, the initial data and updates as the game progresses.</p>
                                  <span class="p">,</span> <span class="nx">current</span><span class="o">:</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">move</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
                                  <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">white</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">black</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">}</span>
                                  <span class="p">,</span> <span class="nx">move</span><span class="o">:</span> <span class="p">{</span> <span class="nx">verbose</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="nx">algebraic</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">}</span>
+                                 <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^(.*)\\[&quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;\\] (kibitzes|whispers): (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                 <span class="p">,</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;kibitzes&quot;</span><span class="p">)</span> <span class="o">?</span> <span class="s2">&quot;kibitz&quot;</span> <span class="o">:</span> <span class="s2">&quot;whisper&quot;</span>
                                  <span class="p">});</span>
     <span class="p">}</span>
 
@@ -415,6 +430,52 @@ structure of the moves is an array of tuple arrays, e.g.</p>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredObservers</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="kibitz">kibitz</h3>
+
+<p>Send a message to all observers and players of a game.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p></li>
+<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p></li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">kibitz</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">deferredKibitz</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;xkibitz&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(kibitzed to \d+ players?\)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredKibitz</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredKibitz</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="whisper">whisper</h3>
+
+<p>Send a message to all observers of a game.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p></li>
+<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p></li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">whisper</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">deferredWhisper</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;xwhisper&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(whispered to \d+ players?\)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredWhisper</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredWhisper</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
 <h3 id="unobserve">unobserve</h3>

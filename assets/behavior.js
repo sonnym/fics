@@ -133,8 +133,16 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                       "type": "heading",
                       "data": {
                         "level": 4,
-                        "title": "updates",
-                        "slug": "updates"
+                        "title": "game updates",
+                        "slug": "game-updates"
+                      },
+                      "depth": 4
+                    }, {
+                      "type": "heading",
+                      "data": {
+                        "level": 4,
+                        "title": "messages",
+                        "slug": "messages"
                       },
                       "depth": 4
                     }
@@ -153,6 +161,22 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                     "level": 3,
                     "title": "observers",
                     "slug": "observers"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "kibitz",
+                    "slug": "kibitz"
+                  },
+                  "depth": 3
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 3,
+                    "title": "whisper",
+                    "slug": "whisper"
                   },
                   "depth": 3
                 }, {
@@ -330,8 +354,16 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                   "type": "heading",
                   "data": {
                     "level": 4,
-                    "title": "updates",
-                    "slug": "updates"
+                    "title": "game updates",
+                    "slug": "game-updates"
+                  },
+                  "depth": 4
+                }, {
+                  "type": "heading",
+                  "data": {
+                    "level": 4,
+                    "title": "messages",
+                    "slug": "messages"
                   },
                   "depth": 4
                 }
@@ -350,6 +382,22 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
                 "level": 3,
                 "title": "observers",
                 "slug": "observers"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "kibitz",
+                "slug": "kibitz"
+              },
+              "depth": 3
+            }, {
+              "type": "heading",
+              "data": {
+                "level": 3,
+                "title": "whisper",
+                "slug": "whisper"
               },
               "depth": 3
             }, {
