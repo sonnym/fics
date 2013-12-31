@@ -334,7 +334,7 @@ exports.testMoves = function(test) {
 exports.testObservers = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("observers");
-  mockSocket.registerMessage("allobservers");
+  mockSocket.registerMessage("allobservers 93");
 
   var fics = new FICSClient();
 
