@@ -94,6 +94,43 @@ FICSClient.prototype.login = function(userData) {
   return deferredLogin.promise;
 };
 
+// ### chat
+//
+// Returns a promise that will notify with any shouts or tells that are
+// received. This promise does not resolve automatically; the caller is
+// expected to discard it.
+//
+// @public
+// @returns {Promise} Will notify as new messages are received.
+FICSClient.prototype.chat = function() {
+  var match = null;
+
+  var deferredChat = Q.defer();
+
+  this.lines(function(line) {
+    if (match = line.match(/^--> (\S+) (.*)$/)) {
+      deferredChat.notify({ type: "it", user: match[1], message: match[2] });
+    }
+
+    if (match = line.match(/^(\S+) shouts: (.*)$/)) {
+      deferredChat.notify({ type: "shout", user: match[1], message: match[2] });
+    }
+
+    if (match = line.match(/^(\S+) tells you: (.*)$/)) {
+      deferredChat.notify({ type: "tell", user: match[1], message: match[2] });
+    }
+
+    if (match = line.match(/^(\S+)\((\d+)\): (.*)$/)) {
+      deferredChat.notify({ type: "tell", user: match[1]
+                          , channel: match[2]
+                          , message: match[3]
+                          });
+    }
+  });
+
+  return deferredChat.promise;
+};
+
 // ### channelList
 //
 // Returns a promise that will resolve with a hash of channel data in the

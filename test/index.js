@@ -78,6 +78,29 @@ exports.testUserLogin = function(test) {
   });
 };
 
+exports.testChat = function(test) {
+  var mockSocket = new MockSocket(test);
+  var messages = [
+    { type: "tell", user: "foobarbaz", message: "test test" }
+  , { type: "it", user: "MAd>", message: "(ics-auto-salutes 'romeo)" }
+  , { type: "shout", user: "PumaGM", message: "it's cool coz u can play on fics and not feel so guilty for wasting time" }
+  , { type: "tell", user: "callipygian(C)", channel: "50", message: "actually a test not real data :(" }
+  ];
+
+  var fics = new FICSClient();
+  fics.chat().progress(function(message) {
+    test.deepEqual(messages.shift(), message);
+
+    if (messages.length === 0) {
+      mockSocket.close();
+      test.done();
+    }
+  });
+
+  mockSocket.registerFixture("chat");
+  mockSocket.run();
+};
+
 exports.testChannelList = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerMessage("help channel_list");
