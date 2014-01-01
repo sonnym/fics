@@ -80,6 +80,8 @@ MockSocket.prototype.close = function() {
   if (this.expectedMessages.length > 0) {
     this.test.ok(false, "expected messages unmet: " + this.expectedMessages.join(", "));
   }
+
+  this.test.done();
 };
 
 module.exports = MockSocket;

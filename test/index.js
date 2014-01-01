@@ -53,7 +53,6 @@ exports.testguestLogin = function(test) {
     test.equal(data.username, "GuestTXCW(U)");
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -74,7 +73,6 @@ exports.testUserLogin = function(test) {
     test.equal(data.username, username);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -93,7 +91,6 @@ exports.testChat = function(test) {
 
     if (messages.length === 0) {
       mockSocket.close();
-      test.done();
     }
   });
 
@@ -114,7 +111,6 @@ exports.testChannelList = function(test) {
     test.equal(72, channels.length);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -129,7 +125,6 @@ exports.testChannels = function(test) {
     test.equal(14, channels.length);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -144,7 +139,6 @@ exports.testJoinChannelSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -159,7 +153,6 @@ exports.testJoinChannelFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -174,7 +167,6 @@ exports.testLeaveChannelSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -189,7 +181,6 @@ exports.testLeaveChannelFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -204,7 +195,6 @@ exports.testTellUserSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -219,7 +209,6 @@ exports.testTellUserFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -234,7 +223,6 @@ exports.testTellChannelOfficialSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -249,7 +237,6 @@ exports.testTellChannelUnofficialSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -264,7 +251,6 @@ exports.testTellChannelUnregisteredFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -279,7 +265,6 @@ exports.testTellChannelRestrictedFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -294,7 +279,6 @@ exports.testTellChannelOutOfBoundsFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -309,7 +293,6 @@ exports.testShoutSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -324,7 +307,6 @@ exports.testShoutItSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -339,7 +321,6 @@ exports.testShoutFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close()
-    test.done();
   });
 };
 
@@ -354,7 +335,6 @@ exports.testWho = function(test) {
     test.equal(1831, users.length);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -368,7 +348,6 @@ exports.testGames = function(test) {
     test.equal(318, games.length);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -464,7 +443,6 @@ exports.testObserve = function(test) {
     test.equal("0-1", result);
 
     mockSocket.close();
-    test.done();
   }, null, function(data) {
     test.deepEqual(notifications.shift(), data);
   });
@@ -480,7 +458,6 @@ exports.testObservingMultipleGames = function(test) {
     test.equal(2, results.length);
 
     mockSocket.close();
-    test.done();
   });
 
   mockSocket.registerFixture("observation");
@@ -500,7 +477,6 @@ exports.testMoves = function(test) {
     test.equal(1, moves[15].length);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -514,7 +490,6 @@ exports.testObservers = function(test) {
   fics.observers("93").then(function(observers) {
     test.equal(6, observers.length);
 
-    test.done();
     mockSocket.close();
   });
 };
@@ -529,7 +504,6 @@ exports.testKibitz = function(test) {
   fics.kibitz("85", "test").then(function(success) {
     test.ok(success);
 
-    test.done();
     mockSocket.close();
   });
 };
@@ -544,7 +518,6 @@ exports.testWhisper = function(test) {
   fics.whisper("85", "test").then(function(success) {
     test.ok(success);
 
-    test.done();
     mockSocket.close();
   });
 };
@@ -560,7 +533,6 @@ exports.testUnobserveSuccess = function(test) {
     test.ok(success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -575,7 +547,6 @@ exports.testUnobserveFailure = function(test) {
     test.ok(!success);
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -589,7 +560,6 @@ exports.testSought = function(test) {
     test.equal(41, games.length)
 
     mockSocket.close();
-    test.done();
   });
 };
 
@@ -600,7 +570,6 @@ exports.testGetSocket = function(test) {
   var fics = new FICSClient();
   fics.getSocket().on("data", function() {
     mockSocket.close();
-    test.done();
   });
 
   mockSocket.run();
