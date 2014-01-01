@@ -218,6 +218,7 @@ FICSClient.prototype.tell = function(recipient, message) {
 
   var deferredTell = this.issueCommand(["tell", recipient, message].join(" "), function(data) {
     if (data.match(/^The range of channels is 0 to 255\.$/) ||
+        data.match(/^Only registered users may send tells to channels other than 4, 7 and 53\.$/) ||
         data.match(new RegExp("^Only .* may send tells to channel " + recipient + "\\.$")) ||
         data.match(new RegExp("^'" + recipient + "' is not a valid handle\\.$"))) {
       deferredTell.resolve(false);

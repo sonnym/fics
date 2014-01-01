@@ -230,6 +230,21 @@ exports.testTellChannelUnofficialSuccess = function(test) {
   });
 };
 
+exports.testTellChannelUnregisteredFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_channel_unregistered_failure");
+  mockSocket.registerMessage("tell 5 test");
+
+  var fics = new FICSClient();
+
+  fics.tell("5", "test").then(function (success) {
+    test.ok(!success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
 exports.testTellChannelRestrictedFailure = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("tell_channel_restricted_failure");
