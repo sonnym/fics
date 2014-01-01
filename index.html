@@ -86,6 +86,41 @@ be written to</p>
   <span class="k">return</span> <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
+<h3 id="chat">chat</h3>
+
+<p>Returns a promise that will notify with any shouts or tells that are
+received. This promise does not resolve automatically; the caller is
+expected to discard it.</p>
+
+<p><strong>Returns a Promise</strong><br/>(Will notify as new messages are received.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">chat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredChat</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^--&gt; (\S+) (.*)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;it&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+) shouts: (.*)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;shout&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+) tells you: (.*)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+)\((\d+)\): (.*)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                          <span class="p">,</span> <span class="nx">channel</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                          <span class="p">,</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                          <span class="p">});</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
 <h3 id="channellist">channelList</h3>
 
 <p>Returns a promise that will resolve with a hash of channel data in the
@@ -190,6 +225,64 @@ subscribed, returned as an array of strings representing the channel numbers</p>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="tell">tell</h3>
+
+<p>Broadcast a message to a user or a channel.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>recipient can be a number or a string.</strong><br/>(The channel number or username)</p></li>
+<li><p><strong>message must be a string.</strong><br/>(The message to send)</p></li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">tell</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">recipient</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">recipient</span> <span class="o">=</span> <span class="nx">recipient</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+
+  <span class="kd">var</span> <span class="nx">deferredTell</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">recipient</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^The range of channels is 0 to 255\.$/</span><span class="p">)</span> <span class="o">||</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Only registered users may send tells to channels other than 4, 7 and 53\.$/</span><span class="p">)</span> <span class="o">||</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Only .* may send tells to channel &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;\\.$&quot;</span><span class="p">))</span> <span class="o">||</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&#39;&quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;&#39; is not a valid handle\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\(told &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;\\).*$&quot;</span><span class="p">))</span> <span class="o">||</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\(told \\d+ players in channel &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;(?:\\s+\&quot;.*\&quot;)?\\).*$&quot;</span><span class="p">)))</span> <span class="p">{</span>
+      <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+
+<h3 id="shout">shout</h3>
+
+<p>Broadcast a message globally to all users listening to shouts.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>message must be a string.</strong><br/>(The message to send)</p></li>
+<li><p><strong>it is optional and must be a boolean.</strong><br/>(Whether to broadcast as an <code>it</code> message, a special kind of shout. Defaults to <code>false</code>.)</p></li>
+</ul>
+
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">shout</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">it</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">it</span> <span class="o">?</span> <span class="s2">&quot;it&quot;</span> <span class="o">:</span> <span class="s2">&quot;shout&quot;</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">deferredShout</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="nx">command</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Only registered players can use the shout command\.$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(shouted to \d+ players\)$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
 <h3 id="who">who</h3>
