@@ -232,6 +232,32 @@ FICSClient.prototype.tell = function(recipient, message) {
   return deferredTell.promise;
 };
 
+// ### shout
+//
+// Broadcast a message globally to all users listening to shouts.
+//
+// @public
+// @param {string} message The message to send
+// @param {boolean} [it] Whether to broadcast as an `it` message, a special
+//                       kind of shout. Defaults to `false`.
+// @return {Promise} A promise that will be resolved with `true` if the message
+//                   is successfully sent and `false` otherwise.
+FICSClient.prototype.shout = function(message, it) {
+  var command = it ? "it" : "shout";
+
+  var deferredShout = this.issueCommand([command, message].join(" "), function(data) {
+    if (data.match(/^Only registered players can use the shout command\.$/)) {
+      deferredShout.resolve(false);
+    }
+
+    if (data.match(/^\(shouted to \d+ players\)$/)) {
+      deferredShout.resolve(true);
+    }
+  });
+
+  return deferredShout.promise;
+};
+
 // ### who
 //
 // Returns a promise that will be resolved with users in the following format.

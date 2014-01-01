@@ -260,6 +260,51 @@ exports.testTellChannelOutOfBoundsFailure = function(test) {
   });
 };
 
+exports.testShoutSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("shout_success");
+  mockSocket.registerMessage("shout test");
+
+  var fics = new FICSClient();
+
+  fics.shout("test").then(function (success) {
+    test.ok(success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testShoutItSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("shout_success");
+  mockSocket.registerMessage("it test");
+
+  var fics = new FICSClient();
+
+  fics.shout("test", true).then(function (success) {
+    test.ok(success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testShoutFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("shout_failure");
+  mockSocket.registerMessage("shout test");
+
+  var fics = new FICSClient();
+
+  fics.shout("test").then(function (success) {
+    test.ok(!success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
 exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("who");
