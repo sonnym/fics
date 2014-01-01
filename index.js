@@ -204,6 +204,34 @@ FICSClient.prototype.leaveChannel = function(channelNumber) {
   return deferredLeaveChannel.promise;
 };
 
+// ### tell
+//
+// Broadcast a message to a user or a channel.
+//
+// @public
+// @param {number|string} recipient The channel number or username
+// @param {string} message The message to send
+// @return {Promise} A promise that will be resolved with `true` if the message
+//                   is successfully sent and `false` otherwise.
+FICSClient.prototype.tell = function(recipient, message) {
+  recipient = recipient.toString();
+
+  var deferredTell = this.issueCommand(["tell", recipient, message].join(" "), function(data) {
+    if (data.match(/^The range of channels is 0 to 255\.$/) ||
+        data.match(new RegExp("^Only .* may send tells to channel " + recipient + "\\.$")) ||
+        data.match(new RegExp("^'" + recipient + "' is not a valid handle\\.$"))) {
+      deferredTell.resolve(false);
+    }
+
+    if (data.match(new RegExp("^\\(told " + recipient + "\\).*$")) ||
+        data.match(new RegExp("^\\(told \\d+ players in channel " + recipient + "(?:\\s+\".*\")?\\).*$"))) {
+      deferredTell.resolve(true);
+    }
+  });
+
+  return deferredTell.promise;
+};
+
 // ### who
 //
 // Returns a promise that will be resolved with users in the following format.

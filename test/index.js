@@ -170,6 +170,96 @@ exports.testLeaveChannelFailure = function(test) {
   });
 };
 
+exports.testTellUserSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_user_success");
+  mockSocket.registerMessage("tell foobarbaz test");
+
+  var fics = new FICSClient();
+
+  fics.tell("foobarbaz", "test").then(function (success) {
+    test.ok(success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testTellUserFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_user_failure");
+  mockSocket.registerMessage("tell foobarbaz test");
+
+  var fics = new FICSClient();
+
+  fics.tell("foobarbaz", "test").then(function (success) {
+    test.ok(!success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testTellChannelOfficialSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_channel_official_success");
+  mockSocket.registerMessage("tell 50 test");
+
+  var fics = new FICSClient();
+
+  fics.tell("50", "test").then(function (success) {
+    test.ok(success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testTellChannelUnofficialSuccess = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_channel_unofficial_success");
+  mockSocket.registerMessage("tell 128 test");
+
+  var fics = new FICSClient();
+
+  fics.tell("128", "test").then(function (success) {
+    test.ok(success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testTellChannelRestrictedFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_channel_restricted_failure");
+  mockSocket.registerMessage("tell 5 test");
+
+  var fics = new FICSClient();
+
+  fics.tell("5", "test").then(function (success) {
+    test.ok(!success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
+exports.testTellChannelOutOfBoundsFailure = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("tell_channel_out_of_bounds_failure");
+  mockSocket.registerMessage("tell 1024 test");
+
+  var fics = new FICSClient();
+
+  fics.tell("1024", "test").then(function (success) {
+    test.ok(!success);
+
+    mockSocket.close()
+    test.done();
+  });
+};
+
 exports.testWho = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("who");
