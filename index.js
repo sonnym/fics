@@ -24,8 +24,6 @@ var ficsPort = 5000;
 var FICSClient = function() {
   this.socket = net.connect({ port: ficsPort, host: ficsHost });
   this.commandQueue = [];
-
-  this.awaitNext();
 };
 
 // ### getSocket
@@ -147,10 +145,16 @@ FICSClient.prototype.chat = function() {
 // @public
 // @return {Promise} The promise to be resolved with channel data
 FICSClient.prototype.channelList = function() {
+  var self = this;
+
   var channels = [];
   var match = null;
 
   var deferredChannels = this.issueBlockingCommand("help channel_list", function(data) {
+    if (data.match(/^Type \[next\] to see next page\.$/)) {
+      self.sendMessage("next");
+    }
+
     if (data.match(/^Last Modified/)) {
       deferredChannels.resolve(channels);
     }
@@ -640,26 +644,6 @@ FICSClient.prototype.sought = function() {
   });
 
   return deferredSought.promise;
-};
-
-// ### awaitNext
-//
-// Creates a promise that monitors the text stream for next page prompts, sends
-// a next command, then starts the process all over again before discarding
-// the promise
-//
-// @private
-FICSClient.prototype.awaitNext = function() {
-  var self = this;
-
-  var pagingPromise = this.lines(function(data) {
-    if (data.match(/^Type \[next\] to see next page\.$/)) {
-      pagingPromise.resolve();
-
-      self.sendMessage("next");
-      self.awaitNext();
-    }
-  });
 };
 
 // ### lines
