@@ -52,6 +52,7 @@ exports.testguestLogin = function(test) {
     test.equal(data.username, "GuestTXCW(U)");
 
     mockSocket.close();
+    fics.end();
   });
 };
 
@@ -71,6 +72,7 @@ exports.testUserLogin = function(test) {
     test.equal(data.username, username);
 
     mockSocket.close();
+    fics.end();
   });
 };
 

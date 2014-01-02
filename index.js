@@ -39,10 +39,13 @@ FICSClient.prototype.getSocket = function() {
 
 // ### end
 //
-// Removes all listeners from and ends the connection to the FICS server.
+// Clears keep alive timeout, then removes all listeners from and ends the
+// connection to the FICS server.
 //
 // @public
 FICSClient.prototype.end = function() {
+  clearTimeout(this.keepAliveTimeoutId);
+
   this.socket.removeAllListeners().end();
 };
 
@@ -80,6 +83,8 @@ FICSClient.prototype.login = function(userData) {
 
     if (match = data.match(/^\*{4} Starting FICS session as (.*) \*{4}$/)) {
       serverUsername = match[1];
+
+      self.keepAlive();
     }
 
     if (data.match(/^fics%$/)) {
@@ -656,6 +661,25 @@ FICSClient.prototype.sought = function() {
   });
 
   return deferredSought.promise;
+};
+
+// ### keepAlive
+//
+// Call the `uptime` command every 59 minutes to keep the connection to the
+// server alive and prevent being kicked due to inactivity (espeically useful
+// when observing games)
+//
+// @private
+FICSClient.prototype.keepAlive = function() {
+  var self = this;
+
+  this.keepAliveTimeoutId = setTimeout(function() {
+    var deferredUptime = self.issueCommand("uptime", function() {
+      deferredUptime.resolve();
+    });
+
+    self.keepAlive();
+  }, 59000);
 };
 
 // ### lines
