@@ -679,7 +679,7 @@ FICSClient.prototype.keepAlive = function() {
     });
 
     self.keepAlive();
-  }, 59000);
+  }, 59 * 60 * 1000);
 };
 
 // ### lines
