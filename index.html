@@ -31,7 +31,10 @@ be written to</p>
 
 <h3 id="end">end</h3>
 
-<p>Removes all listeners from and ends the connection to the FICS server.</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">end</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<p>Clears keep alive timeout, then removes all listeners from and ends the
+connection to the FICS server.</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">end</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">clearTimeout</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">keepAliveTimeoutId</span><span class="p">);</span>
+
   <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeAllListeners</span><span class="p">().</span><span class="nx">end</span><span class="p">();</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
@@ -72,6 +75,8 @@ be written to</p>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\*{4} Starting FICS session as (.*) \*{4}$/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">serverUsername</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+      <span class="nx">self</span><span class="p">.</span><span class="nx">keepAlive</span><span class="p">();</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
@@ -88,7 +93,14 @@ be written to</p>
 
 <p>Returns a promise that will notify with any shouts or tells that are
 received. This promise does not resolve automatically; the caller is
-expected to discard it.</p>
+expected to discard it.
+Notifications appear in the following format:</p>
+
+<pre><code>{ type: {string} [it|shout|tell]
+, user: {string} usernameOfSender
+, message: {string} messageBody
+, channel: {string} [channelIfTellToChannel] }
+</code></pre>
 
 <p><strong>Returns a Promise</strong><br/>(Will notify as new messages are received.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">chat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
@@ -407,7 +419,13 @@ any messages that are sent during the game.</p>
 , type: {string} kibitzOrWhisper }
 </code></pre>
 
-<p>The promise will resolve with the result of the game as a string, e.g. <code>1-0</code>.</p>
+<h4 id="result">result</h4>
+
+<pre><code>{ result: {string} gameResult }
+</code></pre>
+
+<p>The promise will resolve after the game has been removed from the user's
+oberservation list, either by being closed or by manually <code>unobserve</code>ing it.</p>
 
 <p>Parameters:</p>
 
@@ -417,8 +435,6 @@ any messages that are sent during the game.</p>
 
 <p><strong>Returns a Promise</strong><br/>(A promise that will notify with game updates)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observe</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-
-  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
   <span class="kd">var</span> <span class="nx">deferredObservation</span> <span class="o">=</span>  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;observe &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
@@ -454,11 +470,11 @@ any messages that are sent during the game.</p>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^{Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">result</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">result</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">});</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">([</span><span class="s2">&quot;^Removing game&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="s2">&quot;from observation list\\.$&quot;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
     <span class="p">}</span>
   <span class="p">});</span>
 
@@ -638,6 +654,22 @@ The games will be presented in the following format:</p>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<h3 id="keepalive">keepAlive</h3>
+
+<p>Call the <code>uptime</code> command every 59 minutes to keep the connection to the
+server alive and prevent being kicked due to inactivity (espeically useful
+when observing games)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">keepAlive</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">keepAliveTimeoutId</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">deferredUptime</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;uptime&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nx">deferredUptime</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="nx">self</span><span class="p">.</span><span class="nx">keepAlive</span><span class="p">();</span>
+  <span class="p">},</span> <span class="mi">59000</span><span class="p">);</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="lines">lines</h3>
