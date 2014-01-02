@@ -18,8 +18,6 @@ var fics = new FICSClient();
 </code></pre></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">FICSClient</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="nx">net</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span> <span class="nx">port</span><span class="o">:</span> <span class="nx">ficsPort</span><span class="p">,</span> <span class="nx">host</span><span class="o">:</span> <span class="nx">ficsHost</span> <span class="p">});</span>
   <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span> <span class="o">=</span> <span class="p">[];</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 
 <h3 id="getsocket">getSocket</h3>
@@ -134,10 +132,16 @@ format of:</p>
 </code></pre>
 
 <p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channelList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
   <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
   <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Type \[next\] to see next page\.$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Last Modified/</span><span class="p">))</span> <span class="p">{</span>
       <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
     <span class="p">}</span>
@@ -634,23 +638,6 @@ The games will be presented in the following format:</p>
   <span class="p">});</span>
 
   <span class="k">return</span> <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
-<h3 id="awaitnext">awaitNext</h3>
-
-<p>Creates a promise that monitors the text stream for next page prompts, sends
-a next command, then starts the process all over again before discarding
-the promise</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">awaitNext</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-
-  <span class="kd">var</span> <span class="nx">pagingPromise</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Type \[next\] to see next page\.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">pagingPromise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">awaitNext</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="lines">lines</h3>
