@@ -39,7 +39,7 @@ exports.testClose = function(test) {
   test.done();
 };
 
-exports.testguestLogin = function(test) {
+exports.testGuestLogin = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixtures(["login_screen", "login_guest_intermezzo", "login_guest_success"]);
   mockSocket.registerMessage("guest");
