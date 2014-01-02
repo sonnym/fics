@@ -98,6 +98,14 @@ FICSClient.prototype.login = function(userData) {
 // received. This promise does not resolve automatically; the caller is
 // expected to discard it.
 //
+// Notifications appear in the following format:
+// ```
+// { type: {string} [it|shout|tell]
+// , user: {string} usernameOfSender
+// , message: {string} messageBody
+// , channel: {string} [channelIfTellToChannel] }
+// ```
+//
 // @public
 // @returns {Promise} Will notify as new messages are received.
 FICSClient.prototype.chat = function() {
