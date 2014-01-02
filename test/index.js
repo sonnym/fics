@@ -48,8 +48,7 @@ exports.testguestLogin = function(test) {
 
   mockSocket.run();
 
-  var loginPromise = fics.login({});
-  loginPromise.then(function(data) {
+  fics.login({}).then(function(data) {
     test.equal(data.username, "GuestTXCW(U)");
 
     mockSocket.close();
@@ -68,8 +67,7 @@ exports.testUserLogin = function(test) {
 
   mockSocket.run();
 
-  var loginPromise = fics.login({ login: username, password: password });
-  loginPromise.then(function(data) {
+  fics.login({ login: username, password: password }).then(function(data) {
     test.equal(data.username, username);
 
     mockSocket.close();
@@ -86,6 +84,7 @@ exports.testChat = function(test) {
   ];
 
   var fics = new FICSClient();
+
   fics.chat().progress(function(message) {
     test.deepEqual(messages.shift(), message);
 
@@ -106,8 +105,7 @@ exports.testChannelList = function(test) {
 
   var fics = new FICSClient();
 
-  var channelListPromise = fics.channelList();
-  channelListPromise.then(function(channels) {
+  fics.channelList().then(function(channels) {
     test.equal(72, channels.length);
 
     mockSocket.close();
@@ -344,6 +342,7 @@ exports.testGames = function(test) {
   mockSocket.registerFixture("games");
 
   var fics = new FICSClient();
+
   fics.games().then(function(games) {
     test.equal(318, games.length);
 
