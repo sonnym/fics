@@ -424,15 +424,19 @@ FICSClient.prototype.games = function() {
 // , type: {string} kibitzOrWhisper }
 // ```
 //
-// The promise will resolve with the result of the game as a string, e.g. `1-0`.
+// #### result
+// ```
+// { result: {string} gameResult }
+// ```
+//
+// The promise will resolve after the game has been removed from the user's
+// oberservation list, either by being closed or by manually `unobserve`ing it.
 //
 // @public
 // @param {number|string} gameNumber Number of game to observe
 // @return {Promise} A promise that will notify with game updates
 FICSClient.prototype.observe = function(gameNumber) {
   var game = gameNumber.toString();
-
-  var result = null;
   var match = null;
 
   var deferredObservation =  this.issueCommand("observe " + game, function(data) {
@@ -468,11 +472,11 @@ FICSClient.prototype.observe = function(gameNumber) {
     }
 
     if (match = data.match(new RegExp("^{Game " + game + " \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$"))) {
-      result = match[1];
+      deferredObservation.notify({ result: match[1] });
     }
 
     if (data.match(new RegExp(["^Removing game", game, "from observation list\\.$"].join(' ')))) {
-      deferredObservation.resolve(result);
+      deferredObservation.resolve();
     }
   });
 

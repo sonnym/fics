@@ -436,15 +436,13 @@ exports.testObserve = function(test) {
     , { user: "GriffySr(C)(2094)"
       , message: "ply=4; eval=-11.31; nps=53K; time=0.08; egtb=0"
       , type: "whisper" }
+    , { result: "0-1" }
     ];
 
-  var observationPromise = fics.observe(47);
-  observationPromise.then(function(result) {
-    test.equal("0-1", result);
-
-    mockSocket.close();
-  }, null, function(data) {
+  fics.observe(47).progress(function(data) {
     test.deepEqual(notifications.shift(), data);
+  }).then(function(result) {
+    mockSocket.close();
   });
 };
 
