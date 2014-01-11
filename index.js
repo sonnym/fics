@@ -705,18 +705,28 @@ FICSClient.prototype.lines = function(callback) {
 
   function lineFn(data) {
     var data = data.toString();
-    var lines = (bufferedData + data).split("\n");
+    var lines = logicalLines((bufferedData + data).split("\n"));
 
-    lines = _.reduce(lines, function(memo, line, i) {
-      if (line.trim().substr(0, 1) === "\\") {
+    if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
+      bufferedData = lines.pop();
+    }
+
+    _.each(lines, function(line) {
+      deferredData.notify(line.trim());
+    });
+  }
+
+  function logicalLines(rawLines) {
+    return _.reduce(rawLines, function(memo, line, i) {
+      if (isContinuation(line.trim())) {
         return memo;
       };
 
       var continueAppend = true;
-      var combined = _.reduce(_.rest(lines, i + 1), function(memo, line) {
+      var combined = _.reduce(_.rest(rawLines, i + 1), function(memo, line) {
         var trimmedLine = line.trim();
 
-        if (continueAppend && trimmedLine.substr(0, 1) === "\\") {
+        if (continueAppend && isContinuation(trimmedLine)) {
           memo.push(trimmedLine.substr(1).trim());
         } else {
           continueAppend = false;
@@ -729,14 +739,10 @@ FICSClient.prototype.lines = function(callback) {
 
       return memo;
     }, []);
+  }
 
-    if (data[data.length - 1] !== "\n" && data.substr(-2, 2) !== ": ") {
-      bufferedData = lines.pop();
-    }
-
-    _.each(lines, function(line) {
-      deferredData.notify(line.trim());
-    });
+  function isContinuation(line) {
+    return line.substr(0, 1) === "\\";
   }
 
   function removeFn() {
