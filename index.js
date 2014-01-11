@@ -822,7 +822,7 @@ FICSClient.prototype.issueBlockingCommand = function(command, callback) {
 // @private
 // @param {string} message a Message to send to the FICS server
 FICSClient.prototype.sendMessage = function(message) {
-  this.socket.write(message + "\n", "utf8");
+  this.socket.write(message + "\r\n", "utf8");
 };
 
 // export the class

@@ -44,7 +44,7 @@ MockSocket.prototype.registerMessage = function(message) {
 
 MockSocket.prototype.write = function(chunk, encoding) {
   this.test.equal("utf8", encoding);
-  this.test.equal("\n", chunk.substr(chunk.length - 1));
+  this.test.equal("\r\n", chunk.substr(chunk.length - 2));
 
   if (this.expectedMessages.length > 0) {
     var message = this.expectedMessages.shift();
