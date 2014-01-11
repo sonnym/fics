@@ -6,7 +6,8 @@
 <span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;underscore&quot;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">ficsHost</span> <span class="o">=</span> <span class="s2">&quot;freechess.org&quot;</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">ficsPort</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
+<span class="kd">var</span> <span class="nx">ficsPort</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">ficsPrompt</span> <span class="o">=</span> <span class="s2">&quot;fics%&quot;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
 
 <h2 id="ficsclient">FICSClient</h2>
 
@@ -80,11 +81,12 @@ connection to the FICS server.</p></div></div><div class="code"><div class="wrap
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set prompt&quot;</span><span class="p">);</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set seek 0&quot;</span><span class="p">);</span>
       <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set style 12&quot;</span><span class="p">);</span>
       <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">resolve</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="nx">serverUsername</span> <span class="p">});</span>
     <span class="p">}</span>
-  <span class="p">});</span>
+  <span class="p">},</span> <span class="kc">false</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
@@ -676,15 +678,22 @@ when observing games)</p></div></div><div class="code"><div class="wrapper"><spa
 
 <p>Creates a new promise and then feeds each line of input to the provided
 callback. This allows a command to process the stream line-by-line until it
-determines that the promise can be discarded.</p>
+determines that the promise can be discarded.
+This function also handles the joining of lines into logical lines before
+notifying the promise, i.e. combining output that spans over multiple lines.</p>
 
 <p>Parameters:</p>
 
 <ul>
-<li><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</li>
+<li><p><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</p></li>
+<li><p><strong>doRemovePrompt is optional and must be a boolean.</strong><br/>(Whether or not to remove the FICS prompt when found at the beginning of a line)</p></li>
 </ul>
 
-<p><strong>Returns a Deferred</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+<p><strong>Returns a Deferred</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="nx">doRemovePrompt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">doRemovePrompt</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
   <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
 
   <span class="kd">var</span> <span class="nx">deferredData</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
@@ -698,18 +707,32 @@ determines that the promise can be discarded.</p>
 
   <span class="kd">function</span> <span class="nx">lineFn</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-    <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">(</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="nx">logicalLines</span><span class="p">((</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">));</span>
 
-    <span class="nx">lines</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">().</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">bufferedData</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">());</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">logicalLines</span><span class="p">(</span><span class="nx">lines</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="nx">joinContinuationLines</span><span class="p">(</span><span class="nx">lines</span><span class="p">),</span> <span class="p">[]),</span> <span class="nx">removePrompt</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">joinContinuationLines</span><span class="p">(</span><span class="nx">rawLines</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">isContinuation</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">()))</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
       <span class="p">};</span>
 
       <span class="kd">var</span> <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="kd">var</span> <span class="nx">combined</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">rest</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">combined</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">rest</span><span class="p">(</span><span class="nx">rawLines</span><span class="p">,</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">trimmedLine</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="nx">continueAppend</span> <span class="o">&amp;&amp;</span> <span class="nx">trimmedLine</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">continueAppend</span> <span class="o">&amp;&amp;</span> <span class="nx">isContinuation</span><span class="p">(</span><span class="nx">trimmedLine</span><span class="p">))</span> <span class="p">{</span>
           <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">trimmedLine</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">trim</span><span class="p">());</span>
         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
           <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
@@ -721,15 +744,19 @@ determines that the promise can be discarded.</p>
       <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">combined</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">));</span>
 
       <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
-    <span class="p">},</span> <span class="p">[]);</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">bufferedData</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+  <span class="kd">function</span> <span class="nx">removePrompt</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">doRemovePrompt</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">line</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&quot;</span> <span class="o">+</span> <span class="nx">ficsPrompt</span> <span class="o">+</span> <span class="s2">&quot;\\s*&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">line</span><span class="p">;</span>
     <span class="p">}</span>
+  <span class="p">};</span>
 
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">());</span>
-    <span class="p">});</span>
+  <span class="kd">function</span> <span class="nx">isContinuation</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">line</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="kd">function</span> <span class="nx">removeFn</span><span class="p">()</span> <span class="p">{</span>
@@ -740,8 +767,8 @@ determines that the promise can be discarded.</p>
 <h3 id="issuecommand">issueCommand</h3>
 
 <p>Sends a commands to the FICS server and receive output line by line. If no
-callback is provided, the command will execute and be considered complete
-when the next FICS input prompt appears.</p>
+callback is provided, the command will execute and the returned promise will
+be resolved immediately.</p>
 
 <p>Parameters:</p>
 
@@ -751,16 +778,10 @@ when the next FICS input prompt appears.</p>
 </ul>
 
 <p><strong>Returns a Deferred</strong><br/>(The deferred object to be resolved)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
-        <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
   <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">deferredLines</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">deferredLines</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="nx">callback</span> <span class="o">||</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+  <span class="p">});</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
 
@@ -816,7 +837,7 @@ Other commands will continue to run uninterrupted.</p>
 <ul>
 <li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
 </ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sendMessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\r\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
 <span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 
 <h3 id="ranks2fen">ranks2fen</h3>
