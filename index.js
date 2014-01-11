@@ -9,6 +9,7 @@ var _ = require("underscore");
 
 var ficsHost = "freechess.org";
 var ficsPort = 5000;
+var ficsPrompt = "fics%";
 
 // ## FICSClient
 //
@@ -88,11 +89,12 @@ FICSClient.prototype.login = function(userData) {
     }
 
     if (data.match(/^fics%$/)) {
+      self.issueCommand("set prompt");
       self.issueCommand("set seek 0");
       self.issueCommand("set style 12");
       deferredLogin.resolve({ username: serverUsername });
     }
-  });
+  }, false);
 
   return deferredLogin.promise;
 };
@@ -688,10 +690,19 @@ FICSClient.prototype.keepAlive = function() {
 // callback. This allows a command to process the stream line-by-line until it
 // determines that the promise can be discarded.
 //
+// This function also handles the joining of lines into logical lines before
+// notifying the promise, i.e. combining output that spans over multiple lines.
+//
 // @private
 // @param {function} callback A callback that will be attached to the promise
+// @param {boolean} [doRemovePrompt] Whether or not to remove the FICS prompt
+//                                   when found at the beginning of a line
 // @return {Deferred} The promise with attached callback
-FICSClient.prototype.lines = function(callback) {
+FICSClient.prototype.lines = function(callback, doRemovePrompt) {
+  if (arguments.length === 1) {
+    doRemovePrompt = true;
+  }
+
   var self = this;
 
   var deferredData = Q.defer();
@@ -716,8 +727,12 @@ FICSClient.prototype.lines = function(callback) {
     });
   }
 
-  function logicalLines(rawLines) {
-    return _.reduce(rawLines, function(memo, line, i) {
+  function logicalLines(lines) {
+    return _.map(_.reduce(lines, joinContinuationLines(lines), []), removePrompt);
+  }
+
+  function joinContinuationLines(rawLines) {
+    return function(memo, line, i) {
       if (isContinuation(line.trim())) {
         return memo;
       };
@@ -738,8 +753,16 @@ FICSClient.prototype.lines = function(callback) {
       memo.push(combined.join(" "));
 
       return memo;
-    }, []);
+    };
   }
+
+  function removePrompt(line) {
+    if (doRemovePrompt) {
+      return line.replace(new RegExp("^" + ficsPrompt + "\\s*"), "");
+    } else {
+      return line;
+    }
+  };
 
   function isContinuation(line) {
     return line.substr(0, 1) === "\\";
@@ -753,24 +776,18 @@ FICSClient.prototype.lines = function(callback) {
 // ### issueCommand
 //
 // Sends a commands to the FICS server and receive output line by line. If no
-// callback is provided, the command will execute and be considered complete
-// when the next FICS input prompt appears.
+// callback is provided, the command will execute and the returned promise will
+// be resolved immediately.
 //
 // @private
 // @param {string} command The text of the command
 // @param {function} [callback] An optional callback function to process lines
 // @return {Deferred} The deferred object to be resolved
 FICSClient.prototype.issueCommand = function(command, callback) {
-  if (arguments.length === 1) {
-    callback = function(data) {
-      if (data.match(/^fics%$/)) {
-        deferred.resolve();
-      }
-    }
-  }
-
   var deferred = Q.defer();
-  var deferredLines = this.lines(callback);
+  var deferredLines = this.lines(callback || function() {
+    deferred.resolve();
+  });
 
   this.sendMessage(command);
 
