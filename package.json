@@ -21,7 +21,7 @@
   ],
 
   "dependencies": {
-    "q": "*",
+    "q": "1.x.x",
     "underscore": "*"
   },
 
