@@ -54,7 +54,7 @@ exports.testGuestLogin = function(test) {
 
   mockSocket.run();
 
-  fics.login({}).then(function(data) {
+  fics.login().then(function(data) {
     test.equal(data.username, "GuestTXCW(U)");
 
     mockSocket.close();

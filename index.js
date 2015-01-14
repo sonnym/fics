@@ -52,7 +52,8 @@ FICSClient.prototype.end = function() {
 
 // ### login
 //
-// Logs in a user based on the provided data
+// Logs in a user based on the provided data. Empty data will log the user in
+// as a guest.
 //
 // The returned promise will fail if there is a failure logging in.
 //
@@ -60,7 +61,7 @@ FICSClient.prototype.end = function() {
 // @param {object} userData Hash with login and password keys
 // @return {Promise} promise that will resolve with the user login information
 FICSClient.prototype.login = function(userData) {
-  if (userData.login) {
+  if (userData && userData.login) {
     var username = userData.login;
     var password = userData.password;
   } else {
