@@ -9,6 +9,12 @@ var FICSClient = require(path.join(__filename, "..", ".."));
 
 var MockSocket = require("./mock_socket");
 
+process.on("uncaughtException", function(err) {
+  console.log("\nEXCEPTION:");
+  console.log(err);
+  console.log(err.stack);
+});
+
 exports.testClientCanBeCreated = function(test) {
   var mockConnection = sinon.mock(net);
   mockConnection.expects("connect")
