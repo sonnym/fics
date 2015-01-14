@@ -82,6 +82,25 @@ exports.testUserLogin = function(test) {
   });
 };
 
+exports.testUserLoginFailure = function(test) {
+  var username = "test";
+  var password = "bar";
+
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixtures(["login_screen", "login_intermezzo", "login_failure"]);
+  mockSocket.registerMessages([username, password]);
+
+  var fics = new FICSClient();
+
+  mockSocket.run();
+
+  fics.login({ login: username, password: password }).fail(function(err) {
+    test.equal(err.message, "Invalid Password");
+
+    mockSocket.close();
+  });
+};
+
 exports.testChat = function(test) {
   var mockSocket = new MockSocket(test);
   var messages = [

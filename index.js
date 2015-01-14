@@ -52,7 +52,9 @@ FICSClient.prototype.end = function() {
 
 // ### login
 //
-// logs in a user based on the provided data
+// Logs in a user based on the provided data
+//
+// The returned promise will fail if there is a failure logging in.
 //
 // @public
 // @param {object} userData Hash with login and password keys
@@ -80,6 +82,10 @@ FICSClient.prototype.login = function(userData) {
 
     if (data.match(/^Press return/)) {
       self.sendMessage("");
+    }
+
+    if (match = data.match(/^\*{4} Invalid password! \*{4}$/)) {
+      deferredLogin.reject(new Error("Invalid Password"));
     }
 
     if (match = data.match(/^\*{4} Starting FICS session as (.*) \*{4}$/)) {
