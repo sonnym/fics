@@ -87,5 +87,5 @@ MockSocket.prototype.close = function() {
 module.exports = MockSocket;
 
 function loadFixture(fixtureName, cb) {
-  fs.readFile(path.join(__dirname, "fixtures", fixtureName), cb);
+  fs.readFile(path.join(__dirname, "..", "fixtures", fixtureName), cb);
 }
