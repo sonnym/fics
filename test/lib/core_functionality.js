@@ -1,6 +1,7 @@
 var net = require("net");
 var path = require("path");
 
+var _ = require("underscore");
 var sinon = require("sinon");
 
 var FICSClient = require(path.join(__filename, "..", "..", ".."));
@@ -44,6 +45,25 @@ exports.testClose = function(test) {
 
   mockStream.verify();
   mockConnection.restore();
+
+  test.done();
+};
+
+exports.testLinesFunction = function(test) {
+  var client = new FICSClient();
+  var socket = client.getSocket();
+
+  var listenerCount = 25;
+
+  var deffereds = _.map(Array(listenerCount), function(n) {
+    return _.tap(client.lines(_.noop), function() {
+      test.equal(1, socket.listeners("data").length);
+    });
+  });
+
+  _.invoke(deffereds, "resolve");
+
+  client.end();
 
   test.done();
 };

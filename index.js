@@ -24,7 +24,9 @@ var ficsPrompt = "fics%";
 // @constructor
 var FICSClient = function() {
   this.socket = net.connect({ port: ficsPort, host: ficsHost });
+
   this.commandQueue = [];
+  this.deferredData = this.wrapSocket();
 };
 
 // ### end
@@ -680,37 +682,21 @@ FICSClient.prototype.keepAlive = function() {
   }, 59 * 60 * 1000);
 };
 
-// ### lines
+// ### wrapSocket
 //
-// Creates a new promise and then feeds each line of input to the provided
-// callback. This allows a command to process the stream line-by-line until it
-// determines that the promise can be discarded.
+// Creates a deffered object that processes raw data from the socket
+// and notifies any promises created therefrom with each line of data.
 //
 // This function also handles the joining of lines into logical lines before
 // notifying the promise, i.e. combining output that spans over multiple lines.
 //
 // @private
-// @param {function} callback A callback that will be attached to the promise
-// @param {boolean} [doRemovePrompt] Whether or not to remove the FICS prompt
-//                                   when found at the beginning of a line
-// @return {Deferred} The promise with attached callback
-FICSClient.prototype.lines = function(callback, doRemovePrompt) {
-  if (arguments.length === 1) {
-    doRemovePrompt = true;
-  }
-
-  var self = this;
-
-  var deferredData = Q.defer();
+// @return {Deferred} A deferred object wrapping socket data output
+FICSClient.prototype.wrapSocket = function() {
   var bufferedData = "";
+  var deferredData = Q.defer();
 
-  this.socket.on("data", lineFn);
-
-  deferredData.promise.then(removeFn, removeFn, callback);
-
-  return deferredData;
-
-  function lineFn(data) {
+  this.socket.on("data", function(data) {
     var data = data.toString();
     var lines = logicalLines((bufferedData + data).split("\n"));
 
@@ -721,10 +707,12 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
     _.each(lines, function(line) {
       deferredData.notify(line.trim());
     });
-  }
+  });
+
+  return deferredData;
 
   function logicalLines(lines) {
-    return _.map(_.reduce(lines, joinContinuationLines(lines), []), removePrompt);
+    return _.reduce(lines, joinContinuationLines(lines), []);
   }
 
   function joinContinuationLines(rawLines) {
@@ -752,6 +740,29 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
     };
   }
 
+  function isContinuation(line) {
+    return line.substr(0, 1) === "\\";
+  }
+};
+
+// ### lines
+//
+// Creates a new promise and then feeds each line of input to the provided
+// callback. This allows a command to process the stream line-by-line until it
+// determines that the promise can be discarded.
+//
+// @private
+// @param {function} callback A callback that will be attached to the promise
+// @param {boolean} [doRemovePrompt] Whether or not to remove the FICS prompt
+//                                   when found at the beginning of a line
+// @return {Deferred} The promise with attached callback
+FICSClient.prototype.lines = function(callback, doRemovePrompt) {
+  if (arguments.length === 1) {
+    doRemovePrompt = true;
+  }
+
+  this.deferredData.promise.progress(_.compose(callback, removePrompt));
+
   function removePrompt(line) {
     if (doRemovePrompt) {
       return line.replace(new RegExp("^" + ficsPrompt + "\\s*"), "");
@@ -760,13 +771,7 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
     }
   };
 
-  function isContinuation(line) {
-    return line.substr(0, 1) === "\\";
-  }
-
-  function removeFn() {
-    self.socket.removeListener("data", lineFn);
-  }
+  return this.deferredData;
 };
 
 // ### issueCommand
