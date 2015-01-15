@@ -32,7 +32,7 @@ var FICSClient = function() {
 // Provides access to the raw data received from the FICS server, but is not to
 // be written to
 //
-// @public
+// @private
 // @return {EventEmitter} The socket itself
 FICSClient.prototype.getSocket = function() {
   return this.socket;
