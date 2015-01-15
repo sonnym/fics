@@ -1,407 +1,345 @@
 <!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="index.js"><meta name="groc-github-url" content="https://github.com/sonnym/fics"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/sonnym/fics/blob/master/index.js">index.js</a></div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="fics">FICS</h1>
+<p>A promise-based library for interacting with the Free Internet Chess Server</p></div></div><div class="code"><div class="wrapper"><span class="hljs-keyword">var</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">"net"</span>);
 
-<p>A promise-based library for interacting with the Free Internet Chess Server</p></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">net</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;net&quot;</span><span class="p">);</span>
+<span class="hljs-keyword">var</span> Q = <span class="hljs-built_in">require</span>(<span class="hljs-string">"q"</span>);
+<span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">"underscore"</span>);
 
-<span class="kd">var</span> <span class="nx">Q</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;q&quot;</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;underscore&quot;</span><span class="p">);</span>
-
-<span class="kd">var</span> <span class="nx">ficsHost</span> <span class="o">=</span> <span class="s2">&quot;freechess.org&quot;</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">ficsPort</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">ficsPrompt</span> <span class="o">=</span> <span class="s2">&quot;fics%&quot;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
-
+<span class="hljs-keyword">var</span> ficsHost = <span class="hljs-string">"freechess.org"</span>;
+<span class="hljs-keyword">var</span> ficsPort = <span class="hljs-number">5000</span>;
+<span class="hljs-keyword">var</span> ficsPrompt = <span class="hljs-string">"fics%"</span>;</div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
 <h2 id="ficsclient">FICSClient</h2>
-
 <p>The main object for interacting with the FICS server. Creates a new
 connection and handles all command processing.</p>
+<pre><code>var FICSClient = require(&quot;fics&quot;);
+var fics = new FICSClient();</code></pre></div></div><div class="code"><div class="wrapper"><span class="hljs-keyword">var</span> FICSClient = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">this</span>.socket = net.connect({ port: ficsPort, host: ficsHost });
 
-<pre><code>var FICSClient = require("fics");
-var fics = new FICSClient();
-</code></pre></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">FICSClient</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="nx">net</span><span class="p">.</span><span class="nx">connect</span><span class="p">({</span> <span class="nx">port</span><span class="o">:</span> <span class="nx">ficsPort</span><span class="p">,</span> <span class="nx">host</span><span class="o">:</span> <span class="nx">ficsHost</span> <span class="p">});</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span> <span class="o">=</span> <span class="p">[];</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
-<h3 id="getsocket">getSocket</h3>
-
-<p>Provides access to the raw data received from the FICS server, but is not to
-be written to</p>
-
-<p><strong>Returns an EventEmitter</strong><br/>(The socket itself)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getSocket</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">this</span>.commandQueue = [];
+  <span class="hljs-keyword">this</span>.deferredData = <span class="hljs-keyword">this</span>.wrapSocket();
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="end">end</h3>
-
 <p>Clears keep alive timeout, then removes all listeners from and ends the
-connection to the FICS server.</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">end</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="nx">clearTimeout</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">keepAliveTimeoutId</span><span class="p">);</span>
+connection to the FICS server.</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.end = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  clearTimeout(<span class="hljs-keyword">this</span>.keepAliveTimeoutId);
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeAllListeners</span><span class="p">().</span><span class="nx">end</span><span class="p">();</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">this</span>.socket.removeAllListeners().end();
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="login">login</h3>
-
-<p>logs in a user based on the provided data</p>
-
+<p>Logs in a user based on the provided data. Empty data will log the user in
+as a guest.</p>
+<p>The returned promise will fail if there is a failure logging in.</p>
 <p>Parameters:</p>
-
 <ul>
 <li><strong>userData must be an object.</strong><br/>(Hash with login and password keys)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(promise that will resolve with the user login information)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.login = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(userData)</span> </span>{
+  <span class="hljs-keyword">if</span> (userData &amp;&amp; userData.login) {
+    <span class="hljs-keyword">var</span> username = userData.login;
+    <span class="hljs-keyword">var</span> password = userData.password;
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">var</span> username = <span class="hljs-string">"guest"</span>;
+  }
 
-<p><strong>Returns a Promise</strong><br/>(promise that will resolve with the user login information)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">login</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">userData</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">userData</span><span class="p">.</span><span class="nx">login</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">userData</span><span class="p">.</span><span class="nx">login</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">password</span> <span class="o">=</span> <span class="nx">userData</span><span class="p">.</span><span class="nx">password</span><span class="p">;</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="s2">&quot;guest&quot;</span><span class="p">;</span>
-  <span class="p">}</span>
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> serverUsername;
 
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">serverUsername</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
+  <span class="hljs-keyword">var</span> deferredLogin = <span class="hljs-keyword">this</span>.lines(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^login:/</span>)) {
+      self.sendMessage(username);
+    }
 
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">deferredLogin</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^login:/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">username</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^password:/</span>)) {
+      self.sendMessage(password);
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^password:/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">password</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^Press return/</span>)) {
+      self.sendMessage(<span class="hljs-string">""</span>);
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Press return/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^\*{4} Invalid password! \*{4}$/</span>)) {
+      deferredLogin.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Invalid Password"</span>));
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\*{4} Starting FICS session as (.*) \*{4}$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">serverUsername</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^\*{4} Starting FICS session as (.*) \*{4}$/</span>)) {
+      serverUsername = match[<span class="hljs-number">1</span>];
 
-      <span class="nx">self</span><span class="p">.</span><span class="nx">keepAlive</span><span class="p">();</span>
-    <span class="p">}</span>
+      self.keepAlive();
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^fics%$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set prompt&quot;</span><span class="p">);</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set seek 0&quot;</span><span class="p">);</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;set style 12&quot;</span><span class="p">);</span>
-      <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">resolve</span><span class="p">({</span> <span class="nx">username</span><span class="o">:</span> <span class="nx">serverUsername</span> <span class="p">});</span>
-    <span class="p">}</span>
-  <span class="p">},</span> <span class="kc">false</span><span class="p">);</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^fics%$/</span>)) {
+      self.issueCommand(<span class="hljs-string">"set prompt"</span>);
+      self.issueCommand(<span class="hljs-string">"set seek 0"</span>);
+      self.issueCommand(<span class="hljs-string">"set style 12"</span>);
+      deferredLogin.resolve({ username: serverUsername });
+    }
+  }, <span class="hljs-literal">false</span>);
 
-  <span class="k">return</span> <span class="nx">deferredLogin</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredLogin.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="chat">chat</h3>
-
 <p>Returns a promise that will notify with any shouts or tells that are
 received. This promise does not resolve automatically; the caller is
-expected to discard it.
-Notifications appear in the following format:</p>
-
+expected to discard it.</p>
+<p>Notifications appear in the following format:</p>
 <pre><code>{ type: {string} [it|shout|tell]
 , user: {string} usernameOfSender
 , message: {string} messageBody
-, channel: {string} [channelIfTellToChannel] }
-</code></pre>
+, channel: {string} [channelIfTellToChannel] }</code></pre>
+<p><strong>Returns a Promise</strong><br/>(Will notify as new messages are received.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.chat = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(Will notify as new messages are received.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">chat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredChat = Q.defer();
 
-  <span class="kd">var</span> <span class="nx">deferredChat</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+  <span class="hljs-keyword">this</span>.lines(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(line)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = line.match(<span class="hljs-regexp">/^--&gt; (\S+) (.*)$/</span>)) {
+      deferredChat.notify({ type: <span class="hljs-string">"it"</span>, user: match[<span class="hljs-number">1</span>], message: match[<span class="hljs-number">2</span>] });
+    }
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^--&gt; (\S+) (.*)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;it&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = line.match(<span class="hljs-regexp">/^(\S+) shouts: (.*)$/</span>)) {
+      deferredChat.notify({ type: <span class="hljs-string">"shout"</span>, user: match[<span class="hljs-number">1</span>], message: match[<span class="hljs-number">2</span>] });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+) shouts: (.*)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;shout&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = line.match(<span class="hljs-regexp">/^(\S+) tells you: (.*)$/</span>)) {
+      deferredChat.notify({ type: <span class="hljs-string">"tell"</span>, user: match[<span class="hljs-number">1</span>], message: match[<span class="hljs-number">2</span>] });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+) tells you: (.*)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = line.match(<span class="hljs-regexp">/^(\S+)\((\d+)\): (.*)$/</span>)) {
+      deferredChat.notify({ type: <span class="hljs-string">"tell"</span>, user: match[<span class="hljs-number">1</span>]
+                          , channel: match[<span class="hljs-number">2</span>]
+                          , message: match[<span class="hljs-number">3</span>]
+                          });
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\S+)\((\d+)\): (.*)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                          <span class="p">,</span> <span class="nx">channel</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                          <span class="p">,</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-                          <span class="p">});</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredChat</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredChat.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="channellist">channelList</h3>
-
 <p>Returns a promise that will resolve with a hash of channel data in the
 format of:</p>
-
 <pre><code>[{ number: {string} channelNumber
  , name: {string} channelName
  }
 , ...
-]
-</code></pre>
+]</code></pre>
+<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.channelList = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
 
-<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with channel data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channelList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> channels = [];
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-  <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredChannels = <span class="hljs-keyword">this</span>.issueBlockingCommand(<span class="hljs-string">"help channel_list"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^Type \[next\] to see next page\.$/</span>)) {
+      self.sendMessage(<span class="hljs-string">"next"</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;help channel_list&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Type \[next\] to see next page\.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">self</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^Last Modified/</span>)) {
+      deferredChannels.resolve(channels);
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Last Modified/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^(\d+(?:,\d+)*)\s+(.*)$/</span>)) {
+      _.each(match[<span class="hljs-number">1</span>].split(<span class="hljs-string">","</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(channelNumber)</span> </span>{
+        channels.push({ number: channelNumber, name: match[<span class="hljs-number">2</span>]});
+      });
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+(?:,\d+)*)\s+(.*)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">channels</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">channelNumber</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]});</span>
-      <span class="p">});</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredChannels.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="channels">channels</h3>
-
 <p>Retrieve a list of channels to which the logged in user is currently
 subscribed, returned as an array of strings representing the channel numbers</p>
+<pre><code>[ {string} channelNumber, ... ]</code></pre>
+<p><strong>Returns a Promise</strong><br/>(A promise to be resolved)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.channels = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> channels = [];
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<pre><code>[ {string} channelNumber, ... ]
-</code></pre>
+  <span class="hljs-keyword">var</span> deferredChannels = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"=channel"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^((\d+)(\s+)?)+$/</span>)) {
+      deferredChannels.resolve(match[<span class="hljs-number">0</span>].split(<span class="hljs-regexp">/\s+/</span>));
+    }
+  });
 
-<p><strong>Returns a Promise</strong><br/>(A promise to be resolved)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">channels</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-
-  <span class="kd">var</span> <span class="nx">deferredChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;=channel&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^((\d+)(\s+)?)+$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">));</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredChannels</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredChannels.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="joinchannel">joinChannel</h3>
-
-<p>Adds the channel to the user's channel list.</p>
-
+<p>Adds the channel to the user&#39;s channel list.</p>
 <p>Parameters:</p>
-
 <ul>
 <li><strong>The can be a number or a string.</strong><br/>(channel to join.)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully added or <code>false</code> if it was already in the user&#39;s channel list)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.joinChannel = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(channelNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> channel = channelNumber.toString();
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully added or <code>false</code> if it was already in the user's channel list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">joinChannel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">channelNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredJoinChannel = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"+channel "</span> + channel, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\["</span> + channel + <span class="hljs-string">"\\] added to your channel list\\.$"</span>))) {
+      deferredJoinChannel.resolve(<span class="hljs-literal">true</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredJoinChannel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;+channel &quot;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] added to your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\["</span> + channel + <span class="hljs-string">"\\] is already on your channel list\\.$"</span>))) {
+      deferredJoinChannel.resolve(<span class="hljs-literal">false</span>);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] is already on your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredJoinChannel</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredJoinChannel.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="leavechannel">leaveChannel</h3>
-
-<p>Removes the channel from the user's channel list.</p>
-
+<p>Removes the channel from the user&#39;s channel list.</p>
 <p>Parameters:</p>
-
 <ul>
 <li><strong>The can be a number or a string.</strong><br/>(channel to leave.)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully removed or <code>false</code> if it was not in the user&#39;s channel list)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.leaveChannel = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(channelNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> channel = channelNumber.toString();
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the channel was successfully removed or <code>false</code> if it was not in the user's channel list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">leaveChannel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">channelNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">channelNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredLeaveChannel = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"-channel "</span> + channel, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\["</span> + channel + <span class="hljs-string">"\\] removed from your channel list\\.$"</span>))) {
+      deferredLeaveChannel.resolve(<span class="hljs-literal">true</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredLeaveChannel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;-channel &quot;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] removed from your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\["</span> + channel + <span class="hljs-string">"\\] is not in your channel list\\.$"</span>))) {
+      deferredLeaveChannel.resolve(<span class="hljs-literal">false</span>);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\[&quot;</span> <span class="o">+</span> <span class="nx">channel</span> <span class="o">+</span> <span class="s2">&quot;\\] is not in your channel list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredLeaveChannel</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredLeaveChannel.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="tell">tell</h3>
-
 <p>Broadcast a message to a user or a channel.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>recipient can be a number or a string.</strong><br/>(The channel number or username)</p></li>
-<li><p><strong>message must be a string.</strong><br/>(The message to send)</p></li>
+<li><p><strong>recipient can be a number or a string.</strong><br/>(The channel number or username)</p>
+</li>
+<li><p><strong>message must be a string.</strong><br/>(The message to send)</p>
+</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.tell = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(recipient, message)</span> </span>{
+  recipient = recipient.toString();
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">tell</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">recipient</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">recipient</span> <span class="o">=</span> <span class="nx">recipient</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> deferredTell = <span class="hljs-keyword">this</span>.issueCommand([<span class="hljs-string">"tell"</span>, recipient, message].join(<span class="hljs-string">" "</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^The range of channels is 0 to 255\.$/</span>) ||
+        data.match(<span class="hljs-regexp">/^Only registered users may send tells to channels other than 4, 7 and 53\.$/</span>) ||
+        data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^Only .* may send tells to channel "</span> + recipient + <span class="hljs-string">"\\.$"</span>)) ||
+        data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^'"</span> + recipient + <span class="hljs-string">"' is not a valid handle\\.$"</span>))) {
+      deferredTell.resolve(<span class="hljs-literal">false</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredTell</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;tell&quot;</span><span class="p">,</span> <span class="nx">recipient</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^The range of channels is 0 to 255\.$/</span><span class="p">)</span> <span class="o">||</span>
-        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Only registered users may send tells to channels other than 4, 7 and 53\.$/</span><span class="p">)</span> <span class="o">||</span>
-        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Only .* may send tells to channel &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;\\.$&quot;</span><span class="p">))</span> <span class="o">||</span>
-        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&#39;&quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;&#39; is not a valid handle\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\(told "</span> + recipient + <span class="hljs-string">"\\).*$"</span>)) ||
+        data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^\\(told \\d+ players in channel "</span> + recipient + <span class="hljs-string">"(?:\\s+\".*\")?\\).*$"</span>))) {
+      deferredTell.resolve(<span class="hljs-literal">true</span>);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\(told &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;\\).*$&quot;</span><span class="p">))</span> <span class="o">||</span>
-        <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^\\(told \\d+ players in channel &quot;</span> <span class="o">+</span> <span class="nx">recipient</span> <span class="o">+</span> <span class="s2">&quot;(?:\\s+\&quot;.*\&quot;)?\\).*$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredTell</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredTell.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="shout">shout</h3>
-
 <p>Broadcast a message globally to all users listening to shouts.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>message must be a string.</strong><br/>(The message to send)</p></li>
-<li><p><strong>it is optional and must be a boolean.</strong><br/>(Whether to broadcast as an <code>it</code> message, a special kind of shout. Defaults to <code>false</code>.)</p></li>
+<li><p><strong>message must be a string.</strong><br/>(The message to send)</p>
+</li>
+<li><p><strong>it is optional and must be a boolean.</strong><br/>(Whether to broadcast as an <code>it</code> message, a special kind of shout. Defaults to <code>false</code>.)</p>
+</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.shout = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(message, it)</span> </span>{
+  <span class="hljs-keyword">var</span> command = it ? <span class="hljs-string">"it"</span> : <span class="hljs-string">"shout"</span>;
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will be resolved with <code>true</code> if the message is successfully sent and <code>false</code> otherwise.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">shout</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">it</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">it</span> <span class="o">?</span> <span class="s2">&quot;it&quot;</span> <span class="o">:</span> <span class="s2">&quot;shout&quot;</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredShout = <span class="hljs-keyword">this</span>.issueCommand([command, message].join(<span class="hljs-string">" "</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^Only registered players can use the shout command\.$/</span>)) {
+      deferredShout.resolve(<span class="hljs-literal">false</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredShout</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="nx">command</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^Only registered players can use the shout command\.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\(shouted to \d+ players\)$/</span>)) {
+      deferredShout.resolve(<span class="hljs-literal">true</span>);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(shouted to \d+ players\)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredShout</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredShout.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="who">who</h3>
-
 <p>Returns a promise that will be resolved with users in the following format.</p>
-
 <pre><code>[{ name: {string} userName
  , rating: {string} userRating
  , status: {string} userStatus
  , codes: {array} server
  }
 ,...
-]
-</code></pre>
+]</code></pre>
+<p><strong>Returns a Promise</strong><br/>(To be resolved with user data.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.who = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> users = [];
 
-<p><strong>Returns a Promise</strong><br/>(To be resolved with user data.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">who</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> deferredUsers = <span class="hljs-keyword">this</span>.issueBlockingCommand(<span class="hljs-string">"who"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    _.each(data.split(<span class="hljs-regexp">/\s{2,}/</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(datum)</span> </span>{
+      <span class="hljs-keyword">if</span> (match = datum.match(<span class="hljs-regexp">/^(\d+|[+-]{4})([\^~:#'&amp;. ])(\w+)((?:\([*A-Z]+\))*)$/</span>)) {
+        <span class="hljs-keyword">var</span> codes = [];
 
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">deferredUsers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;who&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s{2,}/</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">datum</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+|[+-]{4})([\^~:#&#39;&amp;. ])(\w+)((?:\([*A-Z]+\))*)$/</span><span class="p">))</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">codes</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="hljs-keyword">if</span> (match[<span class="hljs-number">4</span>]) {
+          codes = match[<span class="hljs-number">4</span>].substr(<span class="hljs-number">1</span>, match[<span class="hljs-number">4</span>].length - <span class="hljs-number">2</span>).split(<span class="hljs-string">")("</span>);
+        }
 
-        <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="p">{</span>
-          <span class="nx">codes</span> <span class="o">=</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">].</span><span class="nx">substr</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">].</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">2</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;)(&quot;</span><span class="p">);</span>
-        <span class="p">}</span>
+        users.push({ name: match[<span class="hljs-number">3</span>]
+                   , rating: match[<span class="hljs-number">1</span>]
+                   , status: match[<span class="hljs-number">2</span>]
+                   , codes: codes });
+      }
+    });
 
-        <span class="nx">users</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-                   <span class="p">,</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                   <span class="p">,</span> <span class="nx">status</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                   <span class="p">,</span> <span class="nx">codes</span><span class="o">:</span> <span class="nx">codes</span> <span class="p">});</span>
-      <span class="p">}</span>
-    <span class="p">});</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/</span>)) {
+      deferredUsers.resolve(users);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredUsers</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">users</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredUsers</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredUsers.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="games">games</h3>
-
 <p>Returns a promise that will resolved with an array of data about current
 games on the server in the format:</p>
-
 <pre><code>[{ number: {string} gameNumber
  , white: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
  , black: { name: {string} userName, rating: {string} userRating: time: {string} timeRemaining }
  , move: { color: {string} colorToMove, number: {string} moveNumber }
  }
 , ...
-]
-</code></pre>
-
+]</code></pre>
 <p>Currently does not capture games being examined and, e.g. lectures by
 LectureBot, so the length of the list is shorter than the length returned
 by the server.</p>
+<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with game data)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.games = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> games = [];
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(The promise to be resolved with game data)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">games</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredGames = <span class="hljs-keyword">this</span>.issueBlockingCommand(<span class="hljs-string">"games"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/</span>)) {
+      games.push({ number: match[<span class="hljs-number">1</span>]
+                 , white: { name: match[<span class="hljs-number">3</span>], rating: match[<span class="hljs-number">2</span>], time: match[<span class="hljs-number">6</span>] }
+                 , black: { name: match[<span class="hljs-number">5</span>], rating: match[<span class="hljs-number">4</span>], time: match[<span class="hljs-number">7</span>] }
+                 , move: { color: match[<span class="hljs-number">8</span>], number: match[<span class="hljs-number">9</span>] }
+                 });
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredGames</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueBlockingCommand</span><span class="p">(</span><span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                 <span class="p">,</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">}</span>
-                 <span class="p">,</span> <span class="nx">black</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nx">time</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">}</span>
-                 <span class="p">,</span> <span class="nx">move</span><span class="o">:</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="nx">number</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="p">}</span>
-                 <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\d+ games displayed.$/</span>)) {
+      deferredGames.resolve(games);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+ games displayed.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredGames</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredGames.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="observe">observe</h3>
-
 <p>Observe a game currently in progress. The promise is notified of three
 events: the initial data for the game, updates as the game progresses, and
 any messages that are sent during the game.</p>
-
 <h4 id="initial-data">initial data</h4>
-
 <pre><code>{ white: { name: {string} userName, rating: {string} userRating }
 , black: { name: {string} userName, rating: {string} userRating }
 , rated: {boolean} isRated
 , type: {string} gameType
 , time: { initial: {string} clockInitial
         , increment: {string} clockIncrement
-        } }
-</code></pre>
-
+        } }</code></pre>
 <h4 id="game-updates">game updates</h4>
-
 <pre><code>{ position: {string} fenPosition
 , current: { color: {string} currentMoveColor
            , move: {string} currentMoveNumber
@@ -411,219 +349,182 @@ any messages that are sent during the game.</p>
         }
 , move: { verbose: {string} verboseLastMove
         , algebraic: {string} algebraicLastMove
-        } }
-</code></pre>
-
+        } }</code></pre>
 <h4 id="messages">messages</h4>
-
 <pre><code>{ user: {string} userName
 , message: {string} messageText
-, type: {string} kibitzOrWhisper }
-</code></pre>
-
+, type: {string} kibitzOrWhisper }</code></pre>
 <h4 id="result">result</h4>
-
-<pre><code>{ result: {string} gameResult }
-</code></pre>
-
-<p>The promise will resolve after the game has been removed from the user's
+<pre><code>{ result: {string} gameResult }</code></pre>
+<p>The promise will resolve after the game has been removed from the user&#39;s
 oberservation list, either by being closed or by manually <code>unobserve</code>ing it.</p>
-
 <p>Parameters:</p>
-
 <ul>
 <li><strong>gameNumber can be a number or a string.</strong><br/>(Number of game to observe)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will notify with game updates)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.observe = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will notify with game updates)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observe</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredObservation =  <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"observe "</span> + game, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">var</span> rating = <span class="hljs-string">" \\((\\d+|\\+{4})\\) "</span>;
+    <span class="hljs-keyword">var</span> user = <span class="hljs-string">"(\\w+)"</span>;
+    <span class="hljs-keyword">var</span> newGame = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^Game "</span> + game + <span class="hljs-string">": "</span> + user + rating + user + rating + <span class="hljs-string">"((?:un)?rated) (\\w+) (\\d+) (\\d+)$"</span>);
 
-  <span class="kd">var</span> <span class="nx">deferredObservation</span> <span class="o">=</span>  <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;observe &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">rating</span> <span class="o">=</span> <span class="s2">&quot; \\((\\d+|\\+{4})\\) &quot;</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="s2">&quot;(\\w+)&quot;</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">newGame</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="nx">user</span> <span class="o">+</span> <span class="nx">rating</span> <span class="o">+</span> <span class="s2">&quot;((?:un)?rated) (\\w+) (\\d+) (\\d+)$&quot;</span><span class="p">);</span>
+    <span class="hljs-keyword">if</span> (match = data.match(newGame)) {
+      deferredObservation.notify({ white: { name: match[<span class="hljs-number">1</span>], rating: match[<span class="hljs-number">2</span>] }
+                                 , black: { name: match[<span class="hljs-number">3</span>], rating: match[<span class="hljs-number">4</span>] }
+                                 , rated: match[<span class="hljs-number">5</span>] === <span class="hljs-string">"rated"</span>
+                                 , type: match[<span class="hljs-number">6</span>]
+                                 , time: { initial: match[<span class="hljs-number">7</span>], increment: match[<span class="hljs-number">8</span>] }
+                                 });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">newGame</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">white</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">,</span> <span class="nx">black</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">,</span> <span class="nx">rated</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;rated&quot;</span>
-                                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
-                                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">initial</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="nx">increment</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">var</span> gameUpdate = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^&lt;\\d+&gt; ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}"</span> + game + <span class="hljs-string">" \\w+ \\w+ "</span> +
+                                <span class="hljs-string">"(?:\\d+ ){5}(\\d+) (\\d+) (\\d+) ([RNBQKP]\/[a-h][1-8]-[a-h][1-8]) \\(\\d+:\\d+\\) (.+)(?:\\s+\\d+){3}$"</span>);
 
-    <span class="kd">var</span> <span class="nx">gameUpdate</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&lt;\\d+&gt; ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}&quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\w+ \\w+ &quot;</span> <span class="o">+</span>
-                                <span class="s2">&quot;(?:\\d+ ){5}(\\d+) (\\d+) (\\d+) ([RNBQKP]\/[a-h][1-8]-[a-h][1-8]) \\(\\d+:\\d+\\) (.+)(?:\\s+\\d+){3}$&quot;</span><span class="p">);</span>
+    <span class="hljs-keyword">if</span> (match = data.match(gameUpdate)) {
+      deferredObservation.notify({ position: ranks2fen(match[<span class="hljs-number">1</span>])
+                                 , current: { color: match[<span class="hljs-number">2</span>], move: match[<span class="hljs-number">5</span>] }
+                                 , time: { white: match[<span class="hljs-number">3</span>], black: match[<span class="hljs-number">4</span>] }
+                                 , move: { verbose: match[<span class="hljs-number">6</span>], algebraic: match[<span class="hljs-number">7</span>] }
+                                 });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">gameUpdate</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">position</span><span class="o">:</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                                 <span class="p">,</span> <span class="nx">current</span><span class="o">:</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">move</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">white</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">black</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">,</span> <span class="nx">move</span><span class="o">:</span> <span class="p">{</span> <span class="nx">verbose</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="nx">algebraic</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">}</span>
-                                 <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^(.*)\\["</span> + game + <span class="hljs-string">"\\] (kibitzes|whispers): (.*)$"</span>))) {
+      deferredObservation.notify({ user: match[<span class="hljs-number">1</span>]
+                                 , message: match[<span class="hljs-number">3</span>]
+                                 , type: (match[<span class="hljs-number">2</span>] === <span class="hljs-string">"kibitzes"</span>) ? <span class="hljs-string">"kibitz"</span> : <span class="hljs-string">"whisper"</span>
+                                 });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^(.*)\\[&quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;\\] (kibitzes|whispers): (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                                 <span class="p">,</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-                                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;kibitzes&quot;</span><span class="p">)</span> <span class="o">?</span> <span class="s2">&quot;kibitz&quot;</span> <span class="o">:</span> <span class="s2">&quot;whisper&quot;</span>
-                                 <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^{Game "</span> + game + <span class="hljs-string">" \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$"</span>))) {
+      deferredObservation.notify({ result: match[<span class="hljs-number">1</span>] });
+    }
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^{Game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">notify</span><span class="p">({</span> <span class="nx">result</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>([<span class="hljs-string">"^Removing game"</span>, game, <span class="hljs-string">"from observation list\\.$"</span>].join(<span class="hljs-string">' '</span>)))) {
+      deferredObservation.resolve();
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">([</span><span class="s2">&quot;^Removing game&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="s2">&quot;from observation list\\.$&quot;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))))</span> <span class="p">{</span>
-      <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredObservation</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredObservation.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="moves">moves</h3>
-
 <p>Returns a promise to be resolved with the moves for a given game. The
 structure of the moves is an array of tuple arrays, e.g.</p>
-
 <pre><code>[ [{string} whiteMove, {string} blackMove]
 , ...
 , [{string} whitheMove]
-]
-</code></pre>
-
+]</code></pre>
 <p>Parameters:</p>
-
 <ul>
 <li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will return with the moves of the game)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.moves = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will return with the moves of the game)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">moves</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> moves = [];
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-  <span class="kd">var</span> <span class="nx">moves</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredMoves = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"moves "</span> + game, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^\d+\.\s+([RNBQKPa-h1-8Ox-]+)\s+\(\d+:\d+\)(?:\s+([RNBQKPa-h1-8Ox-]+)?\s+\(\d+:\d+\))?$/</span>)) {
+      <span class="hljs-keyword">if</span> (match[<span class="hljs-number">2</span>]) {
+        moves.push([match[<span class="hljs-number">1</span>], match[<span class="hljs-number">2</span>]]);
+      } <span class="hljs-keyword">else</span> {
+        moves.push([match[<span class="hljs-number">1</span>]]);
+      }
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredMoves</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;moves &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+\.\s+([RNBQKPa-h1-8Ox-]+)\s+\(\d+:\d+\)(?:\s+([RNBQKPa-h1-8Ox-]+)?\s+\(\d+:\d+\))?$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="p">{</span>
-        <span class="nx">moves</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]]);</span>
-      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">moves</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]]);</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^{Still in progress} \*$/</span>)) {
+      deferredMoves.resolve(moves);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^{Still in progress} \*$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredMoves</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">moves</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredMoves</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredMoves.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="observers">observers</h3>
-
 <p>Get a list of all the observers currently watching a game.</p>
-
 <p>Parameters:</p>
-
 <ul>
 <li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will return with the current observers)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.observers = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will return with the current observers)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">observers</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> deferredObservers = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"allobservers "</span> + game, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">var</span> match = data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^Observing "</span> + gameNumber + <span class="hljs-string">" \\[.*\\]:\\s+((.*\\s)+)\\(\\d+ users\\)$"</span>));
 
-  <span class="kd">var</span> <span class="nx">deferredObservers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;allobservers &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Observing &quot;</span> <span class="o">+</span> <span class="nx">gameNumber</span> <span class="o">+</span> <span class="s2">&quot; \\[.*\\]:\\s+((.*\\s)+)\\(\\d+ users\\)$&quot;</span><span class="p">));</span>
+    <span class="hljs-keyword">if</span> (match) {
+      deferredObservers.resolve(match[<span class="hljs-number">1</span>].trim().split(<span class="hljs-regexp">/\s+/</span>));
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferredObservers</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">trim</span><span class="p">().</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">));</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredObservers</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredObservers.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="kibitz">kibitz</h3>
-
 <p>Send a message to all observers and players of a game.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p></li>
-<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p></li>
+<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p>
+</li>
+<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p>
+</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.kibitz = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber, message)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
 
-<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">kibitz</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> deferredKibitz = <span class="hljs-keyword">this</span>.issueCommand([<span class="hljs-string">"xkibitz"</span>, game, message].join(<span class="hljs-string">" "</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\(kibitzed to \d+ players?\)$/</span>)) {
+      deferredKibitz.resolve(<span class="hljs-literal">true</span>);
+    }
+  });
 
-  <span class="kd">var</span> <span class="nx">deferredKibitz</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;xkibitz&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(kibitzed to \d+ players?\)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredKibitz</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredKibitz</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredKibitz.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="whisper">whisper</h3>
-
 <p>Send a message to all observers of a game.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p></li>
-<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p></li>
+<li><p><strong>gameNumber can be a string or a number.</strong><br/>(Number of the game)</p>
+</li>
+<li><p><strong>message must be a string.</strong><br/>(The message to be broadcast)</p>
+</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.whisper = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber, message)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
 
-<p><strong>Returns a Promise</strong><br/>(Resolved after message is sent.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">whisper</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> deferredWhisper = <span class="hljs-keyword">this</span>.issueCommand([<span class="hljs-string">"xwhisper"</span>, game, message].join(<span class="hljs-string">" "</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\(whispered to \d+ players?\)$/</span>)) {
+      deferredWhisper.resolve(<span class="hljs-literal">true</span>);
+    }
+  });
 
-  <span class="kd">var</span> <span class="nx">deferredWhisper</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">([</span><span class="s2">&quot;xwhisper&quot;</span><span class="p">,</span> <span class="nx">game</span><span class="p">,</span> <span class="nx">message</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\(whispered to \d+ players?\)$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredWhisper</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredWhisper</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredWhisper.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="unobserve">unobserve</h3>
-
 <p>Stop observing a game.</p>
-
 <p>Parameters:</p>
-
 <ul>
 <li><strong>gameNumber can be a number or a string.</strong><br/>(Number of the game)</li>
 </ul>
+<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with <code>true</code> if the game was removed from the observation list or <code>false</code> if it was not in the observation list)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.unobserve = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(gameNumber)</span> </span>{
+  <span class="hljs-keyword">var</span> game = gameNumber.toString();
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with <code>true</code> if the game was removed from the observation list or <code>false</code> if it was not in the observation list)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">unobserve</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">gameNumber</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="nx">gameNumber</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> deferredUnobserve = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"unobserve "</span> + game, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^Removing game "</span> + game + <span class="hljs-string">" from observation list\\.$"</span>))) {
+      deferredUnobserve.resolve(<span class="hljs-literal">true</span>);
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredUnobserve</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;unobserve &quot;</span> <span class="o">+</span> <span class="nx">game</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^Removing game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot; from observation list\\.$&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^You are not observing any games\.$/</span>) || data.match(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^You are not observing game "</span> + game + <span class="hljs-string">"\\."</span>))) {
+      deferredUnobserve.resolve(<span class="hljs-literal">false</span>);
+    }
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^You are not observing any games\.$/</span><span class="p">)</span> <span class="o">||</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^You are not observing game &quot;</span> <span class="o">+</span> <span class="nx">game</span> <span class="o">+</span> <span class="s2">&quot;\\.&quot;</span><span class="p">)))</span> <span class="p">{</span>
-      <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredUnobserve</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
-
+  <span class="hljs-keyword">return</span> deferredUnobserve.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="sought">sought</h3>
-
-<p>Get an objecting representing all the games currently awaiting players.
-The games will be presented in the following format:</p>
-
+<p>Get an objecting representing all the games currently awaiting players.</p>
+<p>The games will be presented in the following format:</p>
 <pre><code>[{ number: {string} gameNumber
  , user: { name: {string} userName, rating: {string} userRating }
  , time: { initial: {string} clockInitial, increment: {string} clockIncrement }
@@ -632,250 +533,232 @@ The games will be presented in the following format:</p>
  , range: {string} allowedRatingRange
  }
 , ...
-]
-</code></pre>
+]</code></pre>
+<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with the structure of games.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.sought = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> games = [];
+  <span class="hljs-keyword">var</span> match = <span class="hljs-literal">null</span>;
 
-<p><strong>Returns a Promise</strong><br/>(A promise that will resolve with the structure of games.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sought</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">games</span> <span class="o">=</span> <span class="p">[];</span>
-  <span class="kd">var</span> <span class="nx">match</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="hljs-keyword">var</span> deferredSought = <span class="hljs-keyword">this</span>.issueCommand(<span class="hljs-string">"sought"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">if</span> (match = data.match(<span class="hljs-regexp">/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/</span>)) {
+      games.push({ game: match[<span class="hljs-number">1</span>]
+                 , user: { name: match[<span class="hljs-number">3</span>], rating: match[<span class="hljs-number">2</span>] }
+                 , time: { initial: match[<span class="hljs-number">4</span>], increment: match[<span class="hljs-number">5</span>] }
+                 , rated: match[<span class="hljs-number">6</span>] === <span class="hljs-string">"rated"</span>
+                 , type: match[<span class="hljs-number">7</span>]
+                 , range: match[<span class="hljs-number">8</span>]
+                 });
+    }
 
-  <span class="kd">var</span> <span class="nx">deferredSought</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;sought&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">games</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span> <span class="nx">game</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                 <span class="p">,</span> <span class="nx">user</span><span class="o">:</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">rating</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">}</span>
-                 <span class="p">,</span> <span class="nx">time</span><span class="o">:</span> <span class="p">{</span> <span class="nx">initial</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nx">increment</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
-                 <span class="p">,</span> <span class="nx">rated</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;rated&quot;</span>
-                 <span class="p">,</span> <span class="nx">type</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-                 <span class="p">,</span> <span class="nx">range</span><span class="o">:</span> <span class="nx">match</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
-                 <span class="p">});</span>
-    <span class="p">}</span>
+    <span class="hljs-keyword">if</span> (data.match(<span class="hljs-regexp">/^\d+ ads displayed\.$/</span>)) {
+      deferredSought.resolve(games);
+    };
+  });
 
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+ ads displayed\.$/</span><span class="p">))</span> <span class="p">{</span>
-      <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">games</span><span class="p">);</span>
-    <span class="p">};</span>
-  <span class="p">});</span>
-
-  <span class="k">return</span> <span class="nx">deferredSought</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
+  <span class="hljs-keyword">return</span> deferredSought.promise;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="keepalive">keepAlive</h3>
-
 <p>Call the <code>uptime</code> command every 59 minutes to keep the connection to the
 server alive and prevent being kicked due to inactivity (espeically useful
-when observing games)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">keepAlive</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+when observing games)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.keepAlive = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">keepAliveTimeoutId</span> <span class="o">=</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">deferredUptime</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="s2">&quot;uptime&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-      <span class="nx">deferredUptime</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-    <span class="p">});</span>
+  <span class="hljs-keyword">this</span>.keepAliveTimeoutId = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">var</span> deferredUptime = self.issueCommand(<span class="hljs-string">"uptime"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+      deferredUptime.resolve();
+    });
 
-    <span class="nx">self</span><span class="p">.</span><span class="nx">keepAlive</span><span class="p">();</span>
-  <span class="p">},</span> <span class="mi">59</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">);</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+    self.keepAlive();
+  }, <span class="hljs-number">59</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1000</span>);
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+<h3 id="wrapsocket">wrapSocket</h3>
+<p>Creates a deffered object that processes raw data from the socket
+and notifies any promises created therefrom with each line of data.</p>
+<p>This function also handles the joining of lines into logical lines before
+notifying the promise, i.e. combining output that spans over multiple lines.</p>
+<p><strong>Returns a Deferred</strong><br/>(A deferred object wrapping socket data output)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.wrapSocket = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">var</span> bufferedData = <span class="hljs-string">""</span>;
+  <span class="hljs-keyword">var</span> deferredData = Q.defer();
 
+  <span class="hljs-keyword">this</span>.socket.on(<span class="hljs-string">"data"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+    <span class="hljs-keyword">var</span> data = data.toString();
+    <span class="hljs-keyword">var</span> lines = logicalLines((bufferedData + data).split(<span class="hljs-string">"\n"</span>));
+
+    <span class="hljs-keyword">if</span> (data[data.length - <span class="hljs-number">1</span>] !== <span class="hljs-string">"\n"</span> &amp;&amp; data.substr(-<span class="hljs-number">2</span>, <span class="hljs-number">2</span>) !== <span class="hljs-string">": "</span>) {
+      bufferedData = lines.pop();
+    }
+
+    _.each(lines, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(line)</span> </span>{
+      deferredData.notify(line.trim());
+    });
+  });
+
+  <span class="hljs-keyword">return</span> deferredData;
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logicalLines</span><span class="hljs-params">(lines)</span> </span>{
+    <span class="hljs-keyword">return</span> _.reduce(lines, joinContinuationLines(lines), []);
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">joinContinuationLines</span><span class="hljs-params">(rawLines)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(memo, line, i)</span> </span>{
+      <span class="hljs-keyword">if</span> (isContinuation(line.trim())) {
+        <span class="hljs-keyword">return</span> memo;
+      };
+
+      <span class="hljs-keyword">var</span> continueAppend = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">var</span> combined = _.reduce(_.rest(rawLines, i + <span class="hljs-number">1</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(memo, line)</span> </span>{
+        <span class="hljs-keyword">var</span> trimmedLine = line.trim();
+
+        <span class="hljs-keyword">if</span> (continueAppend &amp;&amp; isContinuation(trimmedLine)) {
+          memo.push(trimmedLine.substr(<span class="hljs-number">1</span>).trim());
+        } <span class="hljs-keyword">else</span> {
+          continueAppend = <span class="hljs-literal">false</span>;
+        }
+
+        <span class="hljs-keyword">return</span> memo;
+      }, [line.trim()]);
+
+      memo.push(combined.join(<span class="hljs-string">" "</span>));
+
+      <span class="hljs-keyword">return</span> memo;
+    };
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isContinuation</span><span class="hljs-params">(line)</span> </span>{
+    <span class="hljs-keyword">return</span> line.substr(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>) === <span class="hljs-string">"\\"</span>;
+  }
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="lines">lines</h3>
-
 <p>Creates a new promise and then feeds each line of input to the provided
 callback. This allows a command to process the stream line-by-line until it
-determines that the promise can be discarded.
-This function also handles the joining of lines into logical lines before
-notifying the promise, i.e. combining output that spans over multiple lines.</p>
-
+determines that the promise can be discarded.</p>
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</p></li>
-<li><p><strong>doRemovePrompt is optional and must be a boolean.</strong><br/>(Whether or not to remove the FICS prompt when found at the beginning of a line)</p></li>
+<li><p><strong>callback must be a function.</strong><br/>(A callback that will be attached to the promise)</p>
+</li>
+<li><p><strong>doRemovePrompt is optional and must be a boolean.</strong><br/>(Whether or not to remove the FICS prompt when found at the beginning of a line)</p>
+</li>
 </ul>
+<p><strong>Returns a Deferred</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.lines = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(callback, doRemovePrompt)</span> </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length === <span class="hljs-number">1</span>) {
+    doRemovePrompt = <span class="hljs-literal">true</span>;
+  }
 
-<p><strong>Returns a Deferred</strong><br/>(The promise with attached callback)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="nx">doRemovePrompt</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">doRemovePrompt</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-  <span class="p">}</span>
+  <span class="hljs-keyword">this</span>.deferredData.promise.progress(_.compose(callback, removePrompt));
 
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removePrompt</span><span class="hljs-params">(line)</span> </span>{
+    <span class="hljs-keyword">if</span> (doRemovePrompt) {
+      <span class="hljs-keyword">return</span> line.replace(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">"^"</span> + ficsPrompt + <span class="hljs-string">"\\s*"</span>), <span class="hljs-string">""</span>);
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">return</span> line;
+    }
+  };
 
-  <span class="kd">var</span> <span class="nx">deferredData</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">bufferedData</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
-
-  <span class="nx">deferredData</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">removeFn</span><span class="p">,</span> <span class="nx">removeFn</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-
-  <span class="k">return</span> <span class="nx">deferredData</span><span class="p">;</span>
-
-  <span class="kd">function</span> <span class="nx">lineFn</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-    <span class="kd">var</span> <span class="nx">lines</span> <span class="o">=</span> <span class="nx">logicalLines</span><span class="p">((</span><span class="nx">bufferedData</span> <span class="o">+</span> <span class="nx">data</span><span class="p">).</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;\n&quot;</span><span class="p">));</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!==</span> <span class="s2">&quot;\n&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!==</span> <span class="s2">&quot;: &quot;</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">bufferedData</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
-    <span class="p">}</span>
-
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferredData</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">());</span>
-    <span class="p">});</span>
-  <span class="p">}</span>
-
-  <span class="kd">function</span> <span class="nx">logicalLines</span><span class="p">(</span><span class="nx">lines</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">lines</span><span class="p">,</span> <span class="nx">joinContinuationLines</span><span class="p">(</span><span class="nx">lines</span><span class="p">),</span> <span class="p">[]),</span> <span class="nx">removePrompt</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="kd">function</span> <span class="nx">joinContinuationLines</span><span class="p">(</span><span class="nx">rawLines</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">isContinuation</span><span class="p">(</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">()))</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="kd">var</span> <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="kd">var</span> <span class="nx">combined</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">rest</span><span class="p">(</span><span class="nx">rawLines</span><span class="p">,</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">memo</span><span class="p">,</span> <span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">trimmedLine</span> <span class="o">=</span> <span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="nx">continueAppend</span> <span class="o">&amp;&amp;</span> <span class="nx">isContinuation</span><span class="p">(</span><span class="nx">trimmedLine</span><span class="p">))</span> <span class="p">{</span>
-          <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">trimmedLine</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">trim</span><span class="p">());</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-          <span class="nx">continueAppend</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
-      <span class="p">},</span> <span class="p">[</span><span class="nx">line</span><span class="p">.</span><span class="nx">trim</span><span class="p">()]);</span>
-
-      <span class="nx">memo</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">combined</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">));</span>
-
-      <span class="k">return</span> <span class="nx">memo</span><span class="p">;</span>
-    <span class="p">};</span>
-  <span class="p">}</span>
-
-  <span class="kd">function</span> <span class="nx">removePrompt</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">doRemovePrompt</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">line</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">&quot;^&quot;</span> <span class="o">+</span> <span class="nx">ficsPrompt</span> <span class="o">+</span> <span class="s2">&quot;\\s*&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="nx">line</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">};</span>
-
-  <span class="kd">function</span> <span class="nx">isContinuation</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">line</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;\\&quot;</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="kd">function</span> <span class="nx">removeFn</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="nx">lineFn</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.deferredData;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="issuecommand">issueCommand</h3>
-
 <p>Sends a commands to the FICS server and receive output line by line. If no
 callback is provided, the command will execute and the returned promise will
 be resolved immediately.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
-<li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p></li>
+<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p>
+</li>
+<li><p><strong>callback is optional and must be a function.</strong><br/>(An optional callback function to process lines)</p>
+</li>
 </ul>
+<p><strong>Returns a Deferred</strong><br/>(The deferred object to be resolved)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.issueCommand = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(command, callback)</span> </span>{
+  <span class="hljs-keyword">var</span> deferred = Q.defer();
+  <span class="hljs-keyword">var</span> deferredLines = <span class="hljs-keyword">this</span>.lines(callback || <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+    deferred.resolve();
+  });
 
-<p><strong>Returns a Deferred</strong><br/>(The deferred object to be resolved)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-  <span class="kd">var</span> <span class="nx">deferredLines</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lines</span><span class="p">(</span><span class="nx">callback</span> <span class="o">||</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
-  <span class="p">});</span>
+  <span class="hljs-keyword">this</span>.sendMessage(command);
 
-  <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">command</span><span class="p">);</span>
+  deferred.promise.then(deferredLines.resolve, deferredLines.resolve);
 
-  <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">deferredLines</span><span class="p">.</span><span class="nx">resolve</span><span class="p">);</span>
-
-  <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
+  <span class="hljs-keyword">return</span> deferred;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="issueblockingcommand">issueBlockingCommand</h3>
-
 <p>Issues a command, but enqueues it if another blocking command is already
 running, thus preventing issues with collisions in regular expressions.
 Other commands will continue to run uninterrupted.</p>
-
 <p>Parameters:</p>
-
 <ul>
-<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p></li>
-<li><p><strong>A must be a function.</strong><br/>(callback function to process lines)</p></li>
+<li><p><strong>command must be a string.</strong><br/>(The text of the command)</p>
+</li>
+<li><p><strong>A must be a function.</strong><br/>(callback function to process lines)</p>
+</li>
 </ul>
+<p><strong>Returns a Deferred</strong><br/>(The deferred object that needs to be resolved before the next command will be run.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.issueBlockingCommand = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(command, callback)</span> </span>{
+  <span class="hljs-keyword">var</span> deferred = Q.defer();
 
-<p><strong>Returns a Deferred</strong><br/>(The deferred object that needs to be resolved before the next command will be run.)</p></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">issueBlockingCommand</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+  <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
+  <span class="hljs-keyword">this</span>.commandQueue.push(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">var</span> deferredCommand = self.issueCommand(command, callback);
 
-  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">deferredCommand</span> <span class="o">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">issueCommand</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+    deferred.promise.then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> </span>{
+      deferredCommand.resolve();
 
-    <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">deferredCommand</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+      self.commandQueue.shift();
 
-      <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+      <span class="hljs-keyword">if</span> (self.commandQueue.length &gt; <span class="hljs-number">0</span>) {
+        self.commandQueue[<span class="hljs-number">0</span>]();
+      }
+    });
+  });
 
-      <span class="k">if</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">self</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
-      <span class="p">}</span>
-    <span class="p">});</span>
-  <span class="p">});</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.commandQueue.length === <span class="hljs-number">1</span>) {
+    <span class="hljs-keyword">this</span>.commandQueue[<span class="hljs-number">0</span>]();
+  }
 
-  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">commandQueue</span><span class="p">[</span><span class="mi">0</span><span class="p">]();</span>
-  <span class="p">}</span>
-
-  <span class="k">return</span> <span class="nx">deferred</span><span class="p">;</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
+  <span class="hljs-keyword">return</span> deferred;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+<h3 id="getsocket">getSocket</h3>
+<p>Provides access to the raw data received from the FICS server, but is not to
+be written to</p>
+<p><strong>Returns an EventEmitter</strong><br/>(The socket itself)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.getSocket = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.socket;
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="sendmessage">sendMessage</h3>
-
 <p>sends a message with the approriate encoding and termination character</p>
-
 <p>Parameters:</p>
-
 <ul>
 <li><strong>message must be a string.</strong><br/>(a Message to send to the FICS server)</li>
-</ul></div></div><div class="code"><div class="wrapper"><span class="nx">FICSClient</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">sendMessage</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">message</span> <span class="o">+</span> <span class="s2">&quot;\r\n&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
-<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">FICSClient</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-
+</ul></div></div><div class="code"><div class="wrapper">FICSClient.prototype.sendMessage = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(message)</span> </span>{
+  <span class="hljs-keyword">this</span>.socket.write(message + <span class="hljs-string">"\r\n"</span>, <span class="hljs-string">"utf8"</span>);
+};</div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>export the class</p></div></div><div class="code"><div class="wrapper"><span class="hljs-built_in">module</span>.exports = FICSClient;</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="ranks2fen">ranks2fen</h3>
-
-<p>Takes a position string like returned by FICS and transforms it into a FEN.
-e.g.
+<p>Takes a position string like returned by FICS and transforms it into a FEN.</p>
+<p>e.g.
 from:
   <code>--Q----- -p---pkp p-----p- ----q--- P-p----- -----r-P ---R--PK --------</code>
 to:
   <code>2Q5/1p3pkp/p5p1/4q3/P1p5/5r1P/3R2PK/8</code></p>
-
 <p>Parameters:</p>
-
 <ul>
 <li><strong>str must be a string.</strong><br/>(A FICS position)</li>
 </ul>
+<p><strong>Returns a string</strong><br/>(A FEN string)</p></div></div><div class="code"><div class="wrapper"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ranks2fen</span><span class="hljs-params">(str)</span> </span>{
+  <span class="hljs-keyword">var</span> ranks = str.split(<span class="hljs-regexp">/\s+/</span>);
 
-<p><strong>Returns a string</strong><br/>(A FEN string)</p></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">ranks2fen</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">ranks</span> <span class="o">=</span> <span class="nx">str</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">);</span>
+  <span class="hljs-keyword">return</span> _.map(ranks, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(rank)</span> </span>{
+    <span class="hljs-keyword">var</span> newRank = <span class="hljs-string">""</span>;
 
-  <span class="k">return</span> <span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">ranks</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">rank</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">newRank</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>, count = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">8</span>; i++) {
+      <span class="hljs-keyword">var</span> letter = rank[i];
 
-    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-      <span class="kd">var</span> <span class="nx">letter</span> <span class="o">=</span> <span class="nx">rank</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+      <span class="hljs-keyword">if</span> (letter === <span class="hljs-string">"-"</span>) {
+        count++;
+        letter = (i === <span class="hljs-number">7</span>) ? count.toString() : <span class="hljs-string">""</span>;
 
-      <span class="k">if</span> <span class="p">(</span><span class="nx">letter</span> <span class="o">===</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
-        <span class="nx">letter</span> <span class="o">=</span> <span class="p">(</span><span class="nx">i</span> <span class="o">===</span> <span class="mi">7</span><span class="p">)</span> <span class="o">?</span> <span class="nx">count</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span> <span class="o">:</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (count &gt; <span class="hljs-number">0</span>) {
+        newRank += count.toString();
+        count = <span class="hljs-number">0</span>;
+      }
 
-      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">newRank</span> <span class="o">+=</span> <span class="nx">count</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-      <span class="p">}</span>
+      newRank += letter;
+    }
 
-      <span class="nx">newRank</span> <span class="o">+=</span> <span class="nx">letter</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">newRank</span><span class="p">;</span>
-  <span class="p">}).</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">);</span>
-<span class="p">};</span></div></div></div></div></body></html>
+    <span class="hljs-keyword">return</span> newRank;
+  }).join(<span class="hljs-string">"/"</span>);
+};</div></div></div></div></body></html>
