@@ -27,17 +27,6 @@ var FICSClient = function() {
   this.commandQueue = [];
 };
 
-// ### getSocket
-//
-// Provides access to the raw data received from the FICS server, but is not to
-// be written to
-//
-// @private
-// @return {EventEmitter} The socket itself
-FICSClient.prototype.getSocket = function() {
-  return this.socket;
-};
-
 // ### end
 //
 // Clears keep alive timeout, then removes all listeners from and ends the
@@ -837,6 +826,17 @@ FICSClient.prototype.issueBlockingCommand = function(command, callback) {
   }
 
   return deferred;
+};
+
+// ### getSocket
+//
+// Provides access to the raw data received from the FICS server, but is not to
+// be written to
+//
+// @private
+// @return {EventEmitter} The socket itself
+FICSClient.prototype.getSocket = function() {
+  return this.socket;
 };
 
 // ### sendMessage
