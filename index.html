@@ -643,7 +643,12 @@ determines that the promise can be discarded.</p>
     doRemovePrompt = <span class="hljs-literal">true</span>;
   }
 
-  <span class="hljs-keyword">this</span>.deferredData.promise.progress(_.compose(callback, removePrompt));
+  <span class="hljs-keyword">var</span> deferredLines = Q.defer();
+  <span class="hljs-keyword">var</span> deferredFn = _.compose(deferredLines.notify, callback, removePrompt)
+
+  <span class="hljs-keyword">this</span>.deferredData.promise.progress(deferredFn);
+
+  <span class="hljs-keyword">return</span> deferredLines;
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removePrompt</span><span class="hljs-params">(line)</span> </span>{
     <span class="hljs-keyword">if</span> (doRemovePrompt) {
@@ -651,9 +656,7 @@ determines that the promise can be discarded.</p>
     } <span class="hljs-keyword">else</span> {
       <span class="hljs-keyword">return</span> line;
     }
-  };
-
-  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.deferredData;
+  }
 };</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="issuecommand">issueCommand</h3>
 <p>Sends a commands to the FICS server and receive output line by line. If no
