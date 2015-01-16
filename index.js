@@ -761,7 +761,12 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
     doRemovePrompt = true;
   }
 
-  this.deferredData.promise.progress(_.compose(callback, removePrompt));
+  var deferredLines = Q.defer();
+  var deferredFn = _.compose(deferredLines.notify, callback, removePrompt)
+
+  this.deferredData.promise.progress(deferredFn);
+
+  return deferredLines;
 
   function removePrompt(line) {
     if (doRemovePrompt) {
@@ -769,9 +774,7 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
     } else {
       return line;
     }
-  };
-
-  return this.deferredData;
+  }
 };
 
 // ### issueCommand
