@@ -876,17 +876,6 @@ FICSClient.prototype.issueBlockingCommand = function(command, callback) {
   return deferred;
 };
 
-// ### getSocket
-//
-// Provides access to the raw data received from the FICS server, but is not to
-// be written to
-//
-// @private
-// @return {EventEmitter} The socket itself
-FICSClient.prototype.getSocket = function() {
-  return this.socket;
-};
-
 // ### sendMessage
 //
 // sends a message with the approriate encoding and termination character

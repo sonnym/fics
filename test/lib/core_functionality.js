@@ -39,20 +39,6 @@ exports.testClientIsAnEmitter = function(test) {
   fics.socket.emit("foo");
 };
 
-exports.testGetSocket = function(test) {
-  var mockSocket = new MockSocket(test);
-  mockSocket.registerFixture("login_screen");
-
-  var fics = new FICSClient();
-
-  fics.getSocket().on("data", function() {
-    mockSocket.close();
-  });
-
-  mockSocket.run();
-  fics.end();
-};
-
 exports.testGetStream = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("login_screen");
@@ -87,7 +73,7 @@ exports.testClose = function(test) {
 
 exports.testLinesFunction = function(test) {
   var client = new FICSClient();
-  var socket = client.getSocket();
+  var socket = client.socket;
 
   var listenerCount = 25;
 
