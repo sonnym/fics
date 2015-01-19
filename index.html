@@ -1,5 +1,9 @@
 <!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="index.js"><meta name="groc-github-url" content="https://github.com/sonnym/fics"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/sonnym/fics/blob/master/index.js">index.js</a></div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="fics">FICS</h1>
 <p>A promise-based library for interacting with the Free Internet Chess Server</p></div></div><div class="code"><div class="wrapper"><span class="hljs-keyword">var</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">"net"</span>);
+<span class="hljs-keyword">var</span> stream = <span class="hljs-built_in">require</span>(<span class="hljs-string">"stream"</span>);
+<span class="hljs-keyword">var</span> util = <span class="hljs-built_in">require</span>(<span class="hljs-string">"util"</span>);
+
+<span class="hljs-keyword">var</span> EventEmitter = <span class="hljs-built_in">require</span>(<span class="hljs-string">"events"</span>).EventEmitter;
 
 <span class="hljs-keyword">var</span> Q = <span class="hljs-built_in">require</span>(<span class="hljs-string">"q"</span>);
 <span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">"underscore"</span>);
@@ -9,13 +13,29 @@
 <span class="hljs-keyword">var</span> ficsPrompt = <span class="hljs-string">"fics%"</span>;</div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p><span class='doc-section-header'>Constructor</span></p>
 <h2 id="ficsclient">FICSClient</h2>
 <p>The main object for interacting with the FICS server. Creates a new
-connection and handles all command processing.</p>
+connection and handles all command processing. The client is an instance
+of EventEmitter that will forward all events from the raw socket, less the
+data event. This is useful for reconnecting in the event of a socket
+timeout.</p>
 <pre><code>var FICSClient = require(&quot;fics&quot;);
 var fics = new FICSClient();</code></pre></div></div><div class="code"><div class="wrapper"><span class="hljs-keyword">var</span> FICSClient = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
   <span class="hljs-keyword">this</span>.socket = net.connect({ port: ficsPort, host: ficsHost });
 
   <span class="hljs-keyword">this</span>.commandQueue = [];
   <span class="hljs-keyword">this</span>.deferredData = <span class="hljs-keyword">this</span>.wrapSocket();
+};
+util.inherits(FICSClient, EventEmitter);</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+<h2 id="on">on</h2>
+<p>An overridden on function that attaches handlers to the internal socket,
+except in the case of the data event.</p>
+<p><strong>Returns a FICSClient</strong><br/>(Returns <code>this</code> for chaining.)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.on = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(event)</span> </span>{
+  <span class="hljs-keyword">if</span> (event === <span class="hljs-string">"data"</span>) {
+    <span class="hljs-keyword">return</span>;
+  }
+
+  <span class="hljs-keyword">this</span>.socket.on.apply(<span class="hljs-keyword">this</span>.socket, <span class="hljs-built_in">arguments</span>);
+
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
 };</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="end">end</h3>
 <p>Clears keep alive timeout, then removes all listeners from and ends the
@@ -23,6 +43,16 @@ connection to the FICS server.</p></div></div><div class="code"><div class="wrap
   clearTimeout(<span class="hljs-keyword">this</span>.keepAliveTimeoutId);
 
   <span class="hljs-keyword">this</span>.socket.removeAllListeners().end();
+};</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
+<h3 id="getstream">getStream</h3>
+<p>A readable stream of all data from the socket connection to the FICS server.
+This should only be used for debugging and logging.</p>
+<p><strong>Returns a stream.Readable</strong><br/>(A stream of the raw data from socket)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.getStream = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.stream) {
+    <span class="hljs-keyword">this</span>.stream = <span class="hljs-keyword">new</span> stream.Readable().wrap(<span class="hljs-keyword">this</span>.socket);
+  }
+
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.stream;
 };</div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public</span></p>
 <h3 id="login">login</h3>
 <p>Logs in a user based on the provided data. Empty data will log the user in
@@ -715,12 +745,6 @@ Other commands will continue to run uninterrupted.</p>
   }
 
   <span class="hljs-keyword">return</span> deferred;
-};</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
-<h3 id="getsocket">getSocket</h3>
-<p>Provides access to the raw data received from the FICS server, but is not to
-be written to</p>
-<p><strong>Returns an EventEmitter</strong><br/>(The socket itself)</p></div></div><div class="code"><div class="wrapper">FICSClient.prototype.getSocket = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.socket;
 };</div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
 <h3 id="sendmessage">sendMessage</h3>
 <p>sends a message with the approriate encoding and termination character</p>
