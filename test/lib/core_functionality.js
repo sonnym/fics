@@ -1,6 +1,7 @@
 var net = require("net");
 var path = require("path");
 
+var EventEmitter = require("events").EventEmitter;
 var Readable = require("stream").Readable;
 
 var _ = require("underscore");
@@ -23,16 +24,33 @@ exports.testClientCanBeCreated = function(test) {
   test.done();
 };
 
+exports.testClientIsAnEmitter = function(test) {
+  var mockSocket = new MockSocket(test);
+
+  var fics = new FICSClient();
+  test.ok(fics instanceof EventEmitter);
+
+
+  fics.on("foo", function() {
+    mockSocket.close();
+  });
+
+  // force private socket to emit an event
+  fics.socket.emit("foo");
+};
+
 exports.testGetSocket = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerFixture("login_screen");
 
   var fics = new FICSClient();
+
   fics.getSocket().on("data", function() {
     mockSocket.close();
   });
 
   mockSocket.run();
+  fics.end();
 };
 
 exports.testGetStream = function(test) {

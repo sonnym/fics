@@ -4,6 +4,9 @@
 
 var net = require("net");
 var stream = require("stream");
+var util = require("util");
+
+var EventEmitter = require("events").EventEmitter;
 
 var Q = require("q");
 var _ = require("underscore");
@@ -15,7 +18,10 @@ var ficsPrompt = "fics%";
 // ## FICSClient
 //
 // The main object for interacting with the FICS server. Creates a new
-// connection and handles all command processing.
+// connection and handles all command processing. The client is an instance
+// of EventEmitter that will forward all events from the raw socket, less the
+// data event. This is useful for reconnecting in the event of a socket
+// timeout.
 //
 // ```
 // var FICSClient = require("fics");
@@ -28,6 +34,24 @@ var FICSClient = function() {
 
   this.commandQueue = [];
   this.deferredData = this.wrapSocket();
+};
+util.inherits(FICSClient, EventEmitter);
+
+// ## on
+//
+// An overridden on function that attaches handlers to the internal socket,
+// except in the case of the data event.
+//
+// @public
+// @return {FICSClient} Returns `this` for chaining.
+FICSClient.prototype.on = function(event) {
+  if (event === "data") {
+    return;
+  }
+
+  this.socket.on.apply(this.socket, arguments);
+
+  return this;
 };
 
 // ### end
