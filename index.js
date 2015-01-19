@@ -3,6 +3,7 @@
 // A promise-based library for interacting with the Free Internet Chess Server
 
 var net = require("net");
+var stream = require("stream");
 
 var Q = require("q");
 var _ = require("underscore");
@@ -39,6 +40,21 @@ FICSClient.prototype.end = function() {
   clearTimeout(this.keepAliveTimeoutId);
 
   this.socket.removeAllListeners().end();
+};
+
+// ### getStream
+//
+// A readable stream of all data from the socket connection to the FICS server.
+// This should only be used for debugging and logging.
+//
+// @public
+// @return {stream.Readable} A stream of the raw data from socket
+FICSClient.prototype.getStream = function() {
+  if (!this.stream) {
+    this.stream = new stream.Readable().wrap(this.socket);
+  }
+
+  return this.stream;
 };
 
 // ### login

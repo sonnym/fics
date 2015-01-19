@@ -1,6 +1,8 @@
 var net = require("net");
 var path = require("path");
 
+var Readable = require("stream").Readable;
+
 var _ = require("underscore");
 var sinon = require("sinon");
 
@@ -27,6 +29,22 @@ exports.testGetSocket = function(test) {
 
   var fics = new FICSClient();
   fics.getSocket().on("data", function() {
+    mockSocket.close();
+  });
+
+  mockSocket.run();
+};
+
+exports.testGetStream = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("login_screen");
+
+  var fics = new FICSClient();
+  var stream = fics.getStream();
+
+  test.ok(stream instanceof Readable);
+
+  stream.on("data", function(data) {
     mockSocket.close();
   });
 
