@@ -12,7 +12,7 @@
   "scripts": {
     "test": "./node_modules/.bin/nodeunit test/index.js",
     "doc-preview": "./node_modules/.bin/groc",
-    "doc-publish": "./node_modules/.bin/groc --gh"
+    "doc-publish": "git config --local status.branch false && ./node_modules/.bin/groc --gh && git config --local --unset status.branch"
   },
 
   "keywords": [
