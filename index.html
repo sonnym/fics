@@ -674,9 +674,11 @@ determines that the promise can be discarded.</p>
   }
 
   <span class="hljs-keyword">var</span> deferredLines = Q.defer();
-  <span class="hljs-keyword">var</span> deferredFn = _.compose(deferredLines.notify, callback, removePrompt)
+  <span class="hljs-keyword">var</span> lineNotifier = _.compose(deferredLines.notify, removePrompt)
 
-  <span class="hljs-keyword">this</span>.deferredData.promise.progress(deferredFn);
+  deferredLines.promise.progress(callback);
+
+  <span class="hljs-keyword">this</span>.deferredData.promise.progress(lineNotifier);
 
   <span class="hljs-keyword">return</span> deferredLines;
 
