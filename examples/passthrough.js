@@ -4,7 +4,7 @@
  * the socket into stdout.
  */
 var FicsClient = require("./../");
-var socket = (new FicsClient()).getSocket();
+var socket = (new FicsClient()).socket; // accessing this private attribute is not recommended
 
 process.stdin.pipe(socket);
 socket.pipe(process.stdout);
