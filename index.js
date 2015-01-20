@@ -802,9 +802,11 @@ FICSClient.prototype.lines = function(callback, doRemovePrompt) {
   }
 
   var deferredLines = Q.defer();
-  var deferredFn = _.compose(deferredLines.notify, callback, removePrompt)
+  var lineNotifier = _.compose(deferredLines.notify, removePrompt)
 
-  this.deferredData.promise.progress(deferredFn);
+  deferredLines.promise.progress(callback);
+
+  this.deferredData.promise.progress(lineNotifier);
 
   return deferredLines;
 
