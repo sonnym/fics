@@ -89,3 +89,26 @@ exports.testLinesFunction = function(test) {
 
   test.done();
 };
+
+exports.testCallbackToLinesDoesNotInterceptUnderlyingPromise = function(test) {
+  var mockSocket = new MockSocket(test);
+  var client = new FICSClient();
+
+  var deferred = client.lines(function(msg) {
+    test.equal(msg, "first call");
+
+    deferred.resolve();
+  });
+
+  client.deferredData.notify("first call");
+
+  deferred.promise.then(function() {
+    test.ok(deferred.promise.isFulfilled());
+  });
+
+  process.nextTick(function() {
+    client.deferredData.notify("second call");
+
+    mockSocket.close();
+  });
+};
