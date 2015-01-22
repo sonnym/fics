@@ -11,6 +11,8 @@ var EventEmitter = require("events").EventEmitter;
 var Q = require("q");
 var _ = require("underscore");
 
+var parser = require("./parser").getMatch;
+
 var ficsHost = "freechess.org";
 var ficsPort = 5000;
 var ficsPrompt = "fics%";
@@ -104,29 +106,29 @@ FICSClient.prototype.login = function(userData) {
 
   var self = this;
   var deferredLogin = this.lines(function(data) {
-    if (data.match(/^login:/)) {
+    if (parser(data, "loginPrompt")) {
       self.sendMessage(username);
     }
 
-    if (data.match(/^password:/)) {
+    if (parser(data, "passwordPrompt")) {
       self.sendMessage(password);
     }
 
-    if (data.match(/^Press return/)) {
+    if (parser(data, "returnPrompt")) {
       self.sendMessage("");
     }
 
-    if (match = data.match(/^\*{4} Invalid password! \*{4}$/)) {
+    if (match = parser(data, "invalidPassword")) {
       deferredLogin.reject(new Error("Invalid Password"));
     }
 
-    if (match = data.match(/^\*{4} Starting FICS session as (.*) \*{4}$/)) {
+    if (match = parser(data, "sessionStarting")) {
       serverUsername = match[1];
 
       self.keepAlive();
     }
 
-    if (data.match(/^fics%$/)) {
+    if (parser(data, "prompt")) {
       self.issueCommand("set prompt");
       self.issueCommand("set seek 0");
       self.issueCommand("set style 12");
@@ -159,19 +161,19 @@ FICSClient.prototype.chat = function() {
   var deferredChat = Q.defer();
 
   this.lines(function(line) {
-    if (match = line.match(/^--> (\S+) (.*)$/)) {
+    if (match = parser(line, "it")) {
       deferredChat.notify({ type: "it", user: match[1], message: match[2] });
     }
 
-    if (match = line.match(/^(\S+) shouts: (.*)$/)) {
+    if (match = parser(line, "shout")) {
       deferredChat.notify({ type: "shout", user: match[1], message: match[2] });
     }
 
-    if (match = line.match(/^(\S+) tells you: (.*)$/)) {
+    if (match = parser(line, "userTell")) {
       deferredChat.notify({ type: "tell", user: match[1], message: match[2] });
     }
 
-    if (match = line.match(/^(\S+)\((\d+)\): (.*)$/)) {
+    if (match = parser(line, "channelTell")) {
       deferredChat.notify({ type: "tell", user: match[1]
                           , channel: match[2]
                           , message: match[3]
@@ -238,7 +240,7 @@ FICSClient.prototype.channels = function() {
   var match = null;
 
   var deferredChannels = this.issueCommand("=channel", function(data) {
-    if (match = data.match(/^((\d+)(\s+)?)+$/)) {
+    if (match = parser(data, "channels")) {
       deferredChannels.resolve(match[0].split(/\s+/));
     }
   });
@@ -260,11 +262,11 @@ FICSClient.prototype.joinChannel = function(channelNumber) {
   var match = null;
 
   var deferredJoinChannel = this.issueCommand("+channel " + channel, function(data) {
-    if (match = data.match(new RegExp("^\\[" + channel + "\\] added to your channel list\\.$"))) {
+    if (match = parser(data, "joinChannelSuccess", channel)) {
       deferredJoinChannel.resolve(true);
     }
 
-    if (match = data.match(new RegExp("^\\[" + channel + "\\] is already on your channel list\\.$"))) {
+    if (match = parser(data, "joinChannelFailure", channel)) {
       deferredJoinChannel.resolve(false);
     }
   });
@@ -286,11 +288,11 @@ FICSClient.prototype.leaveChannel = function(channelNumber) {
   var match = null;
 
   var deferredLeaveChannel = this.issueCommand("-channel " + channel, function(data) {
-    if (match = data.match(new RegExp("^\\[" + channel + "\\] removed from your channel list\\.$"))) {
+    if (match = parser(data, "leaveChannelSuccess", channel)) {
       deferredLeaveChannel.resolve(true);
     }
 
-    if (match = data.match(new RegExp("^\\[" + channel + "\\] is not in your channel list\\.$"))) {
+    if (match = parser(data, "leaveChannelFailure", channel)) {
       deferredLeaveChannel.resolve(false);
     }
   });
@@ -341,11 +343,11 @@ FICSClient.prototype.shout = function(message, it) {
   var command = it ? "it" : "shout";
 
   var deferredShout = this.issueCommand([command, message].join(" "), function(data) {
-    if (data.match(/^Only registered players can use the shout command\.$/)) {
+    if (parser(data, "unregisteredShout")) {
       deferredShout.resolve(false);
     }
 
-    if (data.match(/^\(shouted to \d+ players\)$/)) {
+    if (parser(data, "shoutSuccess")) {
       deferredShout.resolve(true);
     }
   });
@@ -375,7 +377,7 @@ FICSClient.prototype.who = function() {
   var match = null;
   var deferredUsers = this.issueBlockingCommand("who", function(data) {
     _.each(data.split(/\s{2,}/), function(datum) {
-      if (match = datum.match(/^(\d+|[+-]{4})([\^~:#'&. ])(\w+)((?:\([*A-Z]+\))*)$/)) {
+      if (match = parser(datum, "handle")) {
         var codes = [];
 
         if (match[4]) {
@@ -389,7 +391,7 @@ FICSClient.prototype.who = function() {
       }
     });
 
-    if (data.match(/^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/)) {
+    if (parser(data, "whoComplete")) {
       deferredUsers.resolve(users);
     }
   });
@@ -423,7 +425,7 @@ FICSClient.prototype.games = function() {
   var match = null;
 
   var deferredGames = this.issueBlockingCommand("games", function(data) {
-    if (match = data.match(/^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/)) {
+    if (match = parser(data, "game")) {
       games.push({ number: match[1]
                  , white: { name: match[3], rating: match[2], time: match[6] }
                  , black: { name: match[5], rating: match[4], time: match[7] }
@@ -431,7 +433,7 @@ FICSClient.prototype.games = function() {
                  });
     }
 
-    if (data.match(/^\d+ games displayed.$/)) {
+    if (parser(data, "gamesComplete")) {
       deferredGames.resolve(games);
     }
   });
@@ -493,11 +495,7 @@ FICSClient.prototype.observe = function(gameNumber) {
   var match = null;
 
   var deferredObservation =  this.issueCommand("observe " + game, function(data) {
-    var rating = " \\((\\d+|\\+{4})\\) ";
-    var user = "(\\w+)";
-    var newGame = new RegExp("^Game " + game + ": " + user + rating + user + rating + "((?:un)?rated) (\\w+) (\\d+) (\\d+)$");
-
-    if (match = data.match(newGame)) {
+    if (match = parser(data, "observationStart", game)) {
       deferredObservation.notify({ white: { name: match[1], rating: match[2] }
                                  , black: { name: match[3], rating: match[4] }
                                  , rated: match[5] === "rated"
@@ -506,10 +504,7 @@ FICSClient.prototype.observe = function(gameNumber) {
                                  });
     }
 
-    var gameUpdate = new RegExp("^<\\d+> ((?:[-pPrRnNbBqQkK]{8}\\s?){8}) (W|B) (?:-?\\d+ ){6}" + game + " \\w+ \\w+ " +
-                                "(?:\\d+ ){5}(\\d+) (\\d+) (\\d+) ([RNBQKP]\/[a-h][1-8]-[a-h][1-8]) \\(\\d+:\\d+\\) (.+)(?:\\s+\\d+){3}$");
-
-    if (match = data.match(gameUpdate)) {
+    if (match = parser(data, "observationUpdate", game)) {
       deferredObservation.notify({ position: ranks2fen(match[1])
                                  , current: { color: match[2], move: match[5] }
                                  , time: { white: match[3], black: match[4] }
@@ -517,18 +512,18 @@ FICSClient.prototype.observe = function(gameNumber) {
                                  });
     }
 
-    if (match = data.match(new RegExp("^(.*)\\[" + game + "\\] (kibitzes|whispers): (.*)$"))) {
+    if (match = parser(data, "observationChat", game)) {
       deferredObservation.notify({ user: match[1]
                                  , message: match[3]
                                  , type: (match[2] === "kibitzes") ? "kibitz" : "whisper"
                                  });
     }
 
-    if (match = data.match(new RegExp("^{Game " + game + " \\(\\w+ vs. \\w+\\) (?:\\w+\\s?)+} (.*)$"))) {
+    if (match = parser(data, "observationResult", game)) {
       deferredObservation.notify({ result: match[1] });
     }
 
-    if (data.match(new RegExp(["^Removing game", game, "from observation list\\.$"].join(' ')))) {
+    if (parser(data, "observationRemove", game)) {
       deferredObservation.resolve();
     }
   });
@@ -558,7 +553,7 @@ FICSClient.prototype.moves = function(gameNumber) {
   var match = null;
 
   var deferredMoves = this.issueCommand("moves " + game, function(data) {
-    if (match = data.match(/^\d+\.\s+([RNBQKPa-h1-8Ox-]+)\s+\(\d+:\d+\)(?:\s+([RNBQKPa-h1-8Ox-]+)?\s+\(\d+:\d+\))?$/)) {
+    if (match = parser(data, "moves")) {
       if (match[2]) {
         moves.push([match[1], match[2]]);
       } else {
@@ -566,7 +561,7 @@ FICSClient.prototype.moves = function(gameNumber) {
       }
     }
 
-    if (match = data.match(/^{Still in progress} \*$/)) {
+    if (parser(data, "movesComplete")) {
       deferredMoves.resolve(moves);
     }
   });
@@ -585,7 +580,7 @@ FICSClient.prototype.observers = function(gameNumber) {
   var game = gameNumber.toString();
 
   var deferredObservers = this.issueCommand("allobservers " + game, function(data) {
-    var match = data.match(new RegExp("^Observing " + gameNumber + " \\[.*\\]:\\s+((.*\\s)+)\\(\\d+ users\\)$"));
+    var match = parser(data, "observers", game);
 
     if (match) {
       deferredObservers.resolve(match[1].trim().split(/\s+/));
@@ -607,7 +602,7 @@ FICSClient.prototype.kibitz = function(gameNumber, message) {
   var game = gameNumber.toString();
 
   var deferredKibitz = this.issueCommand(["xkibitz", game, message].join(" "), function(data) {
-    if (data.match(/^\(kibitzed to \d+ players?\)$/)) {
+    if (parser(data, "kibitzSuccess")) {
       deferredKibitz.resolve(true);
     }
   });
@@ -627,7 +622,7 @@ FICSClient.prototype.whisper = function(gameNumber, message) {
   var game = gameNumber.toString();
 
   var deferredWhisper = this.issueCommand(["xwhisper", game, message].join(" "), function(data) {
-    if (data.match(/^\(whispered to \d+ players?\)$/)) {
+    if (parser(data, "whisperSuccess")) {
       deferredWhisper.resolve(true);
     }
   });
@@ -648,7 +643,7 @@ FICSClient.prototype.unobserve = function(gameNumber) {
   var game = gameNumber.toString();
 
   var deferredUnobserve = this.issueCommand("unobserve " + game, function(data) {
-    if (data.match(new RegExp("^Removing game " + game + " from observation list\\.$"))) {
+    if (parser(data, "observationRemove", game)) {
       deferredUnobserve.resolve(true);
     }
 
@@ -685,7 +680,7 @@ FICSClient.prototype.sought = function() {
   var match = null;
 
   var deferredSought = this.issueCommand("sought", function(data) {
-    if (match = data.match(/^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/)) {
+    if (match = parser(data, "sought")) {
       games.push({ game: match[1]
                  , user: { name: match[3], rating: match[2] }
                  , time: { initial: match[4], increment: match[5] }
@@ -695,7 +690,7 @@ FICSClient.prototype.sought = function() {
                  });
     }
 
-    if (data.match(/^\d+ ads displayed\.$/)) {
+    if (parser(data, "soughtComplete")) {
       deferredSought.resolve(games);
     };
   });
