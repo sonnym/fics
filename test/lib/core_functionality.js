@@ -71,44 +71,45 @@ exports.testClose = function(test) {
   test.done();
 };
 
-exports.testLinesFunction = function(test) {
-  var client = new FICSClient();
-  var socket = client.socket;
+exports.lines = {
+  testDoesNotCreateAdditionalListenersOnUnderlyingSocket: function(test) {
+    var client = new FICSClient();
+    var socket = client.socket;
 
-  var listenerCount = 25;
+    var listenerCount = 25;
 
-  var deffereds = _.map(Array(listenerCount), function(n) {
-    return _.tap(client.lines(_.noop), function() {
-      test.equal(1, socket.listeners("data").length);
+    var deffereds = _.map(Array(listenerCount), function(n) {
+      return _.tap(client.lines(_.noop), function() {
+        test.equal(1, socket.listeners("data").length);
+      });
     });
-  });
 
-  _.invoke(deffereds, "resolve");
+    _.invoke(deffereds, "resolve");
 
-  client.end();
+    client.end();
+    test.done();
+  },
 
-  test.done();
-};
+  testCallbackDoesNotInterceptUnderlyingPromise: function(test) {
+    var client = new FICSClient();
 
-exports.testCallbackToLinesDoesNotInterceptUnderlyingPromise = function(test) {
-  var mockSocket = new MockSocket(test);
-  var client = new FICSClient();
+    var deferred = client.lines(function(msg) {
+      test.equal(msg, "first call");
 
-  var deferred = client.lines(function(msg) {
-    test.equal(msg, "first call");
+      deferred.resolve();
+    });
 
-    deferred.resolve();
-  });
+    client.deferredData.notify("first call");
 
-  client.deferredData.notify("first call");
+    deferred.promise.then(function() {
+      test.ok(deferred.promise.isFulfilled());
+    });
 
-  deferred.promise.then(function() {
-    test.ok(deferred.promise.isFulfilled());
-  });
+    process.nextTick(function() {
+      client.deferredData.notify("second call");
 
-  process.nextTick(function() {
-    client.deferredData.notify("second call");
-
-    mockSocket.close();
-  });
-};
+      client.end();
+      test.done();
+    });
+  }
+}
