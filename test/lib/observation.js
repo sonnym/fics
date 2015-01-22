@@ -13,7 +13,7 @@ exports.testGames = function(test) {
   var fics = new FICSClient();
 
   fics.games().then(function(games) {
-    test.equal(318, games.length);
+    test.equal(319, games.length);
 
     mockSocket.close();
   });

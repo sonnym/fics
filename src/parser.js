@@ -42,7 +42,7 @@ var expressions = {
   handle: /^(\d+|[+-]{4})([\^~:#'&. ])(\w+)((?:\([*A-Z]+\))*)$/,
   whoComplete: /^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/,
 
-  game: /^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-\s+((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/,
+  game: /^(\d+)\s+(\d+|\+{4})\s+(\w+)\s+(\d+|\+{4})\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-?\s*((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/,
   gamesComplete: /^\d+ games displayed.$/,
 
 
