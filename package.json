@@ -10,7 +10,7 @@
   },
 
   "scripts": {
-    "test": "./node_modules/.bin/nodeunit test/index.js",
+    "test": "./node_modules/.bin/nodeunit test/*.js",
     "doc-preview": "./node_modules/.bin/groc",
     "doc-publish": "git config --local status.branch false && ./node_modules/.bin/groc --gh && git config --local --unset status.branch"
   },
