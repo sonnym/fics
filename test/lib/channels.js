@@ -3,21 +3,6 @@ var path = require("path");
 var FICSClient = require(path.join(__filename, "..", "..", ".."));
 var MockSocket = require("./mock_socket");
 
-exports.testChannelList = function(test) {
-  var mockSocket = new MockSocket(test);
-  mockSocket.registerMessage("help channel_list");
-  mockSocket.registerFixtures(["channel_list_page1", "channel_list_page2", "channel_list_page3",
-                               "channel_list_page4", "channel_list_page5"]);
-
-  var fics = new FICSClient();
-
-  fics.channelList().then(function(channels) {
-    test.equal(72, channels.length);
-
-    mockSocket.close();
-  });
-};
-
 exports.testChannels = function(test) {
   var mockSocket = new MockSocket(test);
   mockSocket.registerMessage("=channel");

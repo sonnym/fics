@@ -190,46 +190,6 @@ FICSClient.prototype.chat = function() {
   return deferredChat.promise;
 };
 
-// ### channelList
-//
-// Returns a promise that will resolve with a hash of channel data in the
-// format of:
-//
-// ```
-// [{ number: {string} channelNumber
-//  , name: {string} channelName
-//  }
-// , ...
-// ]
-// ```
-//
-// @public
-// @return {Promise} The promise to be resolved with channel data
-FICSClient.prototype.channelList = function() {
-  var self = this;
-
-  var channels = [];
-  var match = null;
-
-  var deferredChannels = this.issueBlockingCommand("help channel_list", function(data) {
-    if (data.match(/^Type \[next\] to see next page\.$/)) {
-      self.sendMessage("next");
-    }
-
-    if (data.match(/^Last Modified/)) {
-      deferredChannels.resolve(channels);
-    }
-
-    if (match = data.match(/^(\d+(?:,\d+)*)\s+(.*)$/)) {
-      _.each(match[1].split(","), function(channelNumber) {
-        channels.push({ number: channelNumber, name: match[2]});
-      });
-    }
-  });
-
-  return deferredChannels.promise;
-};
-
 // ### channels
 //
 // Retrieve a list of channels to which the logged in user is currently
