@@ -78,7 +78,9 @@ var expressions = {
   whisperSuccess: /^\(whispered to \d+ players?\)$/,
 
   sought: /^\s*(\d*)\s+(\d*|\+{4})\s+(\w+(?:\(C\))?)\s+(\d+)\s+(\d+) ((?:un)?rated)\s+([\w/]+)\s+(\d+-\d+)\s?\w*$/,
-  soughtComplete: /^\d+ ads displayed\.$/
+  soughtComplete: /^\d+ ads displayed\.$/,
+
+  eco: /(ECO|NIC|LONG)\[\s*(\d+)\]: (.*)/
 };
 
 exports.getMatch = function(line, expressionKey) {

@@ -201,3 +201,21 @@ exports.testUnobserveFailure = function(test) {
     mockSocket.close();
   });
 };
+
+exports.testEcoCommand = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("eco");
+  mockSocket.registerMessage("eco 225");
+
+  var fics = new FICSClient();
+
+  fics.eco("225").then(function(eco) {
+    test.deepEqual(eco, {
+      eco: { halfMoves: "10", value: "D37.11" },
+      nic: { halfMoves: "11", value: "QO.04.2" },
+      long: { halfMoves: "10", value: "QGD: Classical, 5...O-O" },
+    });
+
+    mockSocket.close();
+  });
+};

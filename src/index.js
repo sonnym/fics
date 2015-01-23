@@ -664,6 +664,43 @@ FICSClient.prototype.sought = function() {
   return deferredSought.promise;
 };
 
+// ### eco
+//
+// Get data about the ECO for a particular game.
+//
+// ```
+// { eco: { halfMoves: {string} halfMoveCount
+//        , value: {string} code
+//        }
+// , nic: { halfMoves: {string} halfMoveCount
+//        , value: {string} code
+//        }
+// , long: { halfMoves: {string} halfMoveCount
+//         , value: {string} description
+//         }
+// }
+// ```
+//
+// @public
+// @param {number|string} gameNumber Number of the game
+// @return {Promise} A promise that will resolve with the ECO data.
+FICSClient.prototype.eco = function(gameNumber) {
+  var game = gameNumber.toString();
+  var eco = { };
+
+  var deferredEco = this.issueBlockingCommand("eco " + game, function(data) {
+    if (match = parser(data, "eco")) {
+      eco[match[1].toLowerCase()] = { halfMoves: match[2], value: match[3] };
+
+      if (match[1] === "LONG") {
+        deferredEco.resolve(eco);
+      }
+    }
+  });
+
+  return deferredEco.promise;
+};
+
 // ### keepAlive
 //
 // Call the `uptime` command every 59 minutes to keep the connection to the
