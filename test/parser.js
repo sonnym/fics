@@ -11,8 +11,20 @@ exports.testNegativeTimeFormatInObservationUpdates = function(test) {
 
 exports.testEmptyPaddingInGameList = function(test) {
   var line = "32 2715 GMIvanchuk  2862 GMCarlsen  [ su120   0] 1:52:33 -1:41:23 (28-28) B: 18";
+  var match = parser(line, "game");
 
-  test.ok(parser(line, "game"));
+  test.equal("32", match[1]);
+
+  test.equal("2715", match[2]);
+  test.equal("GMIvanchuk", match[3]);
+  test.equal("1:52:33", match[6]);
+
+  test.equal("2862", match[4]);
+  test.equal("GMCarlsen", match[5]);
+  test.equal("1:41:23", match[7]);
+
+  test.equal("B", match[8]);
+  test.equal("18", match[9]);
 
   test.done();
 };
