@@ -113,3 +113,8 @@ exports.lines = {
     });
   }
 }
+
+exports.testConstantsExposed = function(test) {
+  test.ok(FICSClient.constants instanceof Object);
+  test.done();
+};

@@ -39,6 +39,12 @@ var FICSClient = function() {
 };
 util.inherits(FICSClient, EventEmitter);
 
+// ## constants
+//
+// Constants from the FICS server. Channels, user status codes, and user
+// handle codes
+FICSClient.constants = require("./constants");
+
 // ## on
 //
 // An overridden on function that attaches handlers to the internal socket,
