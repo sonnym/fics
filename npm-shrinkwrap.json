@@ -1,0 +1,16 @@
+{
+  "name": "fics",
+  "version": "0.6.1",
+  "dependencies": {
+    "q": {
+      "version": "1.1.2",
+      "from": "q@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/q/-/q-1.1.2.tgz"
+    },
+    "underscore": {
+      "version": "1.7.0",
+      "from": "underscore@*",
+      "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.7.0.tgz"
+    }
+  }
+}
