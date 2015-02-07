@@ -33,7 +33,7 @@
   },
 
   "author": "Sonny Michaud <michaud.sonny@gmail.com> (https://github.com/sonnym)",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/sonnym/fics/issues"
   }
