@@ -16,3 +16,17 @@ exports.testWho = function(test) {
     mockSocket.close();
   });
 };
+
+exports.testAdmins = function(test) {
+  var mockSocket = new MockSocket(test);
+  mockSocket.registerFixture("showadmins");
+  mockSocket.registerMessage("showadmins");
+
+  var fics = new FICSClient();
+
+  fics.admins().then(function(admins) {
+    test.equal(7, admins.length);
+
+    mockSocket.close();
+  });
+};

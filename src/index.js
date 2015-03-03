@@ -365,6 +365,34 @@ FICSClient.prototype.who = function() {
   return deferredUsers.promise;
 };
 
+// ### admins
+//
+// Returns a promise that will resolve with a list of admins currently logged on.
+// ```
+// [{ name: {string} userName
+//  , status: {string} (Available|Off_duty|Idle|Playing)
+//  , idle: {string} amount of time idle, e.g. "5hrs, 50mins"
+//  }
+// ,...
+// ]
+//
+FICSClient.prototype.admins = function() {
+  var admins = [];
+
+  var match = null;
+  var deferredAdmins = this.issueBlockingCommand("showadmins", function(data) {
+    if (match = parser(data, "showAdminsHandle")) {
+      admins.push({ name: match[1], status: match[2], idle: match[3] });
+    }
+
+    if (parser(data, "showAdminsComplete")) {
+      deferredAdmins.resolve(admins);
+    }
+  });
+
+  return deferredAdmins.promise;
+};
+
 // ### games
 //
 // Returns a promise that will resolved with an array of data about current
