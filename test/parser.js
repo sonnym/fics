@@ -28,3 +28,12 @@ exports.testEmptyPaddingInGameList = function(test) {
 
   test.done();
 };
+
+exports.testTellsOnlyCaptureUserHandle = function(test) {
+  var line = "schert(*) tells you: go ahead";
+  var match = parser(line, "userTell");
+
+  test.equal("schert", match[1]);
+
+  test.done();
+};

@@ -15,7 +15,7 @@ var expressions = {
 
   it: /^--> (\S+) (.*)$/,
   shout: /^(\S+) shouts: (.*)$/,
-  userTell: /^(\S+) tells you: (.*)$/,
+  userTell: /^(\w+)\(?.*\)? tells you: (.*)$/,
   channelTell: /^(\S+)\((\d+)\): (.*)$/,
 
   unregisteredShout: /^Only registered players can use the shout command\.$/,
