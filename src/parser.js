@@ -42,7 +42,7 @@ var expressions = {
   handle: /^(\d+|[+-]{4})([\^~:#'&. ])(\w+)((?:\([*A-Z]+\))*)$/,
   whoComplete: /^\d+ players displayed \(of \d+\)\. \(\*\) indicates system administrator\.$/,
 
-  showAdminsHandle: /^(\w+)\s+(Available|Off_duty|Idle|Playing)\s+[0-9a-z, ]*$/,
+  showAdminsHandle: /^(\w+)\s+(Available|Off_duty|Idle|Playing)\s+([0-9a-z, ]*)$/,
   showAdminsComplete: /^Or ask your question in channel 1 \/ email support@freechess.org.$/,
 
   game: /^(\d+)\s+(\d+|(?:(?:\+|-){4}))\s+(\w+)\s+(\d+|(?:(?:\+|-){4}))\s+(\w+)\s+\[.*\]\s+((?:\d+:)?\d+:\d+)\s+-?\s*((?:\d+:)?\d+:\d+)\s+\(.*\)\s+(W|B):\s+(\d+)$/,

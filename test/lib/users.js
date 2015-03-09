@@ -26,6 +26,7 @@ exports.testAdmins = function(test) {
 
   fics.admins().then(function(admins) {
     test.equal(7, admins.length);
+    test.equal("9 mins", admins[0].idle);
 
     mockSocket.close();
   });
